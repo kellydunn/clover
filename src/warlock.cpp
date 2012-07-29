@@ -2,7 +2,6 @@
 #include <math.h>
 #include <fftw3.h>
 #include <jack/jack.h>
-#include <sndfile.h>
 #include <freej.h>
 
 jack_client_t *client;

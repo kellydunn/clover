@@ -7,8 +7,8 @@ Don't worry your pretty little head about it.
 ## deps
 
 - ljack
-- laubio
 - lfreej
+- lfftw3
 
 ## roadmap
 
