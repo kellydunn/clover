@@ -29,12 +29,15 @@ int process(jack_nframes_t nframes, void *args){
   output = (jack_default_audio_sample_t *)jack_port_get_buffer(output_port, nframes);
   for (i = 0; i < nframes; i++) {
     fftw_in[i] = window(output[i], i);
+    printf("%f", fftw_in[i]);
   }
+  printf("\n");
 
   return 0;
 };
 
 int main(int argc, char **argv) {
+  // JACK
   client = jack_client_open(client_name, options, &status, server_name);
   if(client == NULL) {
     fprintf(stderr, "Could not open a connection to the JACK server.  Is JACK running?\n");
@@ -53,6 +56,8 @@ int main(int argc, char **argv) {
   if(ports != NULL) {
     jack_connect(client, jack_port_name(output_port), ports[0]);
   }
+
+  // FreeJ
 
   for(;;){}
   return 0;
