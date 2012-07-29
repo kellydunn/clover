@@ -38,6 +38,8 @@ int process(jack_nframes_t nframes, void *args){
     }
   }
 
+  // TODO send that shit to freej
+
   return 0;
 };
 
@@ -66,6 +68,7 @@ int main(int argc, char **argv) {
   }
 
   // FreeJ
+
 
   for(;;){}
   return 0;
