@@ -2,6 +2,8 @@
 #include <math.h>
 #include <fftw3.h>
 #include <jack/jack.h>
+#include <gst/gst.h>
+#include <glib.h>
 
 jack_client_t *client;
 jack_options_t options = JackNoStartServer;
@@ -67,6 +69,9 @@ int main(int argc, char **argv) {
   }
 
   // Gstreamer?
+
+  GstBus *bus;
+  GstElement *pipeline;
 
   for(;;){}
   return 0;
