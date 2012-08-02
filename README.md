@@ -7,9 +7,9 @@ Don't worry your pretty little head about it.
 ## deps
 
 - ljack
-- lfreej
+- lgstreamer-0.10
 - lfftw3
 
 ## roadmap
 
-- jack => aubio => freej
+- jack => fft => gstreamer

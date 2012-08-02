@@ -2,7 +2,6 @@
 #include <math.h>
 #include <fftw3.h>
 #include <jack/jack.h>
-#include <freej.h>
 
 jack_client_t *client;
 jack_options_t options = JackNoStartServer;
@@ -38,7 +37,7 @@ int process(jack_nframes_t nframes, void *args){
     }
   }
 
-  // TODO send that shit to freej
+  // TODO send that shit to gstreamer?
 
   return 0;
 };
@@ -67,8 +66,7 @@ int main(int argc, char **argv) {
     jack_connect(client, jack_port_name(output_port_r), ports[0]);
   }
 
-  // FreeJ
-
+  // Gstreamer?
 
   for(;;){}
   return 0;
