@@ -39,8 +39,6 @@ int process(jack_nframes_t nframes, void *args){
     }
   }
 
-  // TODO send that shit to gstreamer?
-
   return 0;
 };
 
@@ -68,14 +66,32 @@ int main(int argc, char **argv) {
     jack_connect(client, jack_port_name(output_port_r), ports[0]);
   }
 
-  // Gstreamer?
   gst_init(&argc, &argv);
   GError *error = NULL;
   GstBus *bus;
-  GstElement *pipeline;
+  GstPad *pad, *ghost_pad;
+  GstElement *pipeline, *bin, *vert;
 
   pipeline = gst_parse_launch("playbin2 uri=http://docs.gstreamer.com/media/sintel_trailer-480p.webm", NULL);
+
+  vert = gst_element_factory_make("vertigotv", "effectv");
+
+  bin = gst_bin_new("video_sink_bin");
+  gst_bin_add(GST_BIN(bin), vert);
+  gst_element_link(vert, bin);
+
+  pad = gst_element_get_static_pad (vert, "sink");
+  ghost_pad = gst_ghost_pad_new ("sink", pad);
+  gst_pad_set_active (ghost_pad, TRUE);
+  gst_element_add_pad (bin, ghost_pad);
+  gst_object_unref (pad);
+
+  g_object_set (G_OBJECT (vert), "speed", (gfloat)5, NULL);
+  g_object_set (G_OBJECT (vert), "zoom-speed", (gfloat)1.05, NULL);
+
+  g_object_set (GST_OBJECT (pipeline), "video-sink", bin, NULL);
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
 
   for(;;){}
   return 0;
