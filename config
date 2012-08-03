@@ -3,6 +3,7 @@ LDFLAGS="-I/usr/lib/clang/2.8/include -I/usr/include/ "
 LDFLAGS=$LDFLAGS`pkg-config --cflags --libs jack`
 LDFLAGS=$LDFLAGS`pkg-config --cflags --libs fftw3`
 LDFLAGS=$LDFLAGS`pkg-config --cflags --libs gstreamer-0.10`
+LDFLAGS=$LDFLAGS`pkg-config --cflags --libs gstreamer-plugins-base-0.10`
 
 TARGETS="clang $LDFLAGS src/warlock.cpp -o bin/warlock"
 
