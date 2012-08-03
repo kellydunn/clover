@@ -69,9 +69,13 @@ int main(int argc, char **argv) {
   }
 
   // Gstreamer?
-
+  gst_init(&argc, &argv);
+  GError *error = NULL;
   GstBus *bus;
   GstElement *pipeline;
+
+  pipeline = gst_parse_launch("playbin2 uri=http://docs.gstreamer.com/media/sintel_trailer-480p.webm", NULL);
+  gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
   for(;;){}
   return 0;
