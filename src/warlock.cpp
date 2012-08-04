@@ -17,7 +17,6 @@ jack_nframes_t *frames;
 const char *client_name = "warlock";
 const char *server_name = NULL;
 const char **ports;
-
 const int PI = 3.14159254;
 
 double window(jack_default_audio_sample_t in, int n) {
@@ -67,31 +66,22 @@ int main(int argc, char **argv) {
   }
 
   gst_init(&argc, &argv);
-  GError *error = NULL;
-  GstBus *bus;
-  GstPad *pad, *ghost_pad;
-  GstElement *pipeline, *bin, *vert;
+  GstElement *pipeline, *source, *sink, *sol, *vert, *ffmpegcolor;
+  GstMessage *msg;
+
+  source = gst_element_factory_make("videotestsrc", "source");
+  ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
+  vert = gst_element_factory_make("vertigotv", "effectv");
+  sol = gst_element_factory_make("solarize", "gaudieffects");
+  sink = gst_element_factory_make("autovideosink", "sink");
 
   pipeline = gst_parse_launch("playbin2 uri=http://docs.gstreamer.com/media/sintel_trailer-480p.webm", NULL);
 
-  vert = gst_element_factory_make("vertigotv", "effectv");
+  gst_bin_add_many(GST_BIN(pipeline), source, ffmpegcolor, vert, sol, sink, NULL);
+  gst_element_link_many(source, vert, ffmpegcolor, sink, NULL);
 
-  bin = gst_bin_new("video_sink_bin");
-  gst_bin_add(GST_BIN(bin), vert);
-  gst_element_link(vert, bin);
 
-  pad = gst_element_get_static_pad (vert, "sink");
-  ghost_pad = gst_ghost_pad_new ("sink", pad);
-  gst_pad_set_active (ghost_pad, TRUE);
-  gst_element_add_pad (bin, ghost_pad);
-  gst_object_unref (pad);
-
-  g_object_set (G_OBJECT (vert), "speed", (gfloat)5, NULL);
-  g_object_set (G_OBJECT (vert), "zoom-speed", (gfloat)1.05, NULL);
-
-  g_object_set (GST_OBJECT (pipeline), "video-sink", bin, NULL);
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
-
 
   for(;;){}
   return 0;
