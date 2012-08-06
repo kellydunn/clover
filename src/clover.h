@@ -2,7 +2,7 @@
 #include <gst/gst.h>
 #include <glib.h>
 
-typedef struct _NubData {
+typedef struct _CloverData {
   GstElement *pipeline;
   GstElement *source;
   GstElement *decoder;
@@ -12,12 +12,12 @@ typedef struct _NubData {
   GstElement *ffmpegcolor;
   GstElement *vert;
   GstElement *sol;
-  NubJackData *nub_jack_data;
-} NubData;
+  CloverJackData *clover_jack_data;
+} CloverData;
 
-typedef struct _NubParams {
-  NubData * nub_data;
-  NubJackData * nub_jack_data;
-} NubParams;
+typedef struct _CloverParams {
+  CloverData * clover_data;
+  CloverJackData * clover_jack_data;
+} CloverParams;
 
-static void gst_pad_added(GstElement *src, GstPad *new_pad, NubData *data);
+static void gst_pad_added(GstElement *src, GstPad *new_pad, CloverData *data);

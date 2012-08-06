@@ -1,26 +1,26 @@
-#include "nub-jack.h"
-#include "nub.h"
+#include "clover-jack.h"
+#include "clover.h"
 
 GstBus * bus;
 GstElement *ffmpegcolor2;
 GstElement *sink_bin;
 static GMainLoop *loop;
 
-NubJackData nub_jack_init();
+CloverJackData clover_jack_init();
 jack_port_t * input_port_l;
 jack_port_t * input_port_r;
-NubData *global_data;
+CloverData *global_data;
 
 int main(int argc, char **argv) {
-  NubData data;
+  CloverData data;
   global_data = &data;
-  NubJackData jack_data = nub_jack_init();
+  CloverJackData jack_data = clover_jack_init();
   GstBus *bus;
   GstMessage *msg;
   gboolean terminate = FALSE;
 
   gst_init(&argc, &argv);
-  data.nub_jack_data = &jack_data;
+  data.clover_jack_data = &jack_data;
 
   // Processing elements
   data.source = gst_element_factory_make("filesrc", "source");
@@ -34,8 +34,8 @@ int main(int argc, char **argv) {
   data.sol = gst_element_factory_make("solarize", "gaudieffects");
 
   // Pipeline and bins
-  data.pipeline = gst_pipeline_new("nub-pipeline");
-  data.processing_bin = gst_bin_new("nub-processing-bin");
+  data.pipeline = gst_pipeline_new("clover-pipeline");
+  data.processing_bin = gst_bin_new("clover-processing-bin");
 
   // Processing Bin
   gst_bin_add_many(GST_BIN(data.processing_bin), data.decoder,
@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-static void gst_pad_added(GstElement *src, GstPad *new_pad, NubData *data) {
+static void gst_pad_added(GstElement *src, GstPad *new_pad, CloverData *data) {
   GstPad *sink_pad = gst_element_get_static_pad(data->ffmpegcolor, "sink");
   GstPadLinkReturn ret;
   GstCaps *new_pad_caps = NULL;
@@ -141,12 +141,12 @@ exit:
   gst_object_unref(sink_pad);
 }
 
-double window(NubJackData * data, jack_default_audio_sample_t in, int n) {
+double window(CloverJackData * data, jack_default_audio_sample_t in, int n) {
   return .5 * (1 - cos(2*PI*n/(int)data->frames)) * (double)in;
 }
 
 int process(jack_nframes_t nframes, void *args){
-  NubJackData *data = (NubJackData*)args;
+  CloverJackData *data = (CloverJackData*)args;
 
   jack_default_audio_sample_t *input_r;
   jack_default_audio_sample_t *input_l;
@@ -169,11 +169,11 @@ int process(jack_nframes_t nframes, void *args){
   return 0;
 }
 
-NubJackData nub_jack_init() {
-  NubJackData data;
+CloverJackData clover_jack_init() {
+  CloverJackData data;
 
   data.options = JackNoStartServer;
-  data.client_name = "nub";
+  data.client_name = "clover";
   data.server_name = NULL;
 
   data.client = jack_client_open(data.client_name, data.options, &data.status, data.server_name);

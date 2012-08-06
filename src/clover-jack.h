@@ -3,7 +3,7 @@
 #include <fftw3.h>
 #include <jack/jack.h>
 
-typedef struct _NubJackData {
+typedef struct _CloverJackData {
   jack_client_t *client;
   jack_options_t options;
   jack_status_t status;
@@ -17,7 +17,7 @@ typedef struct _NubJackData {
   const char *client_name;
   const char *server_name;
   const char **ports;
-} NubJackData;
+} CloverJackData;
 
 const int PI = 3.14159254;
 
