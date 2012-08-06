@@ -1,23 +1,5 @@
-#include <stdio.h>
-#include <math.h>
-#include <fftw3.h>
-#include <jack/jack.h>
-#include <gst/gst.h>
-#include <glib.h>
+#include "nub-jack.h"
 
-jack_client_t *client;
-jack_options_t options = JackNoStartServer;
-jack_status_t status;
-jack_port_t *input_port_r;
-jack_port_t *input_port_l;
-jack_port_t *output_port_r;
-jack_port_t *output_port_l;
-jack_nframes_t *frames;
-
-const char *client_name = "warlock";
-const char *server_name = NULL;
-const char **ports;
-const int PI = 3.14159254;
 
 double window(jack_default_audio_sample_t in, int n) {
   return .5 * (1 - cos(2*PI*n/(int)frames)) * (double)in;
@@ -42,9 +24,11 @@ int process(jack_nframes_t nframes, void *args){
 };
 
 int main(int argc, char **argv) {
+  NubJackData *data;
   // JACK
-  client = jack_client_open(client_name, options, &status, server_name);
-  if(client == NULL) {
+  /*
+  data.client = jack_client_open(data.client_name, data.options, &data.status, data.server_name);
+  if(data.client == NULL) {
     fprintf(stderr, "Could not open a connection to the JACK server.  Is JACK running?\n");
     return 1;
   }
@@ -64,25 +48,6 @@ int main(int argc, char **argv) {
     jack_connect(client, jack_port_name(output_port_l), ports[0]);
     jack_connect(client, jack_port_name(output_port_r), ports[0]);
   }
+  */
 
-  gst_init(&argc, &argv);
-  GstElement *pipeline, *source, *sink, *sol, *vert, *ffmpegcolor;
-  GstMessage *msg;
-
-  source = gst_element_factory_make("videotestsrc", "source");
-  ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
-  vert = gst_element_factory_make("vertigotv", "effectv");
-  sol = gst_element_factory_make("solarize", "gaudieffects");
-  sink = gst_element_factory_make("autovideosink", "sink");
-
-  pipeline = gst_parse_launch("playbin2 uri=http://docs.gstreamer.com/media/sintel_trailer-480p.webm", NULL);
-
-  gst_bin_add_many(GST_BIN(pipeline), source, ffmpegcolor, vert, sol, sink, NULL);
-  gst_element_link_many(source, vert, ffmpegcolor, sink, NULL);
-
-
-  gst_element_set_state(pipeline, GST_STATE_PLAYING);
-
-  for(;;){}
-  return 0;
 }
