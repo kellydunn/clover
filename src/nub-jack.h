@@ -4,20 +4,22 @@
 #include <jack/jack.h>
 
 typedef struct _NubJackData {
-  jack_client_t *client,
-  jack_options_t options = JackNoStartServer,
-  jack_status_t status,
-  jack_port_t *input_port_r,
-  jack_port_t *input_port_l,
-  jack_port_t *output_port_r,
-  jack_port_t *output_port_l,
-  jack_nframes_t *frames,
-  const char *client_name = "nub",
-  const char *server_name = NULL,
-  const char **ports
+  jack_client_t *client;
+  jack_options_t options;
+  jack_status_t status;
+  jack_port_t *input_port_r;
+  jack_port_t *input_port_l;
+  jack_port_t *output_port_r;
+  jack_port_t *output_port_l;
+  jack_nframes_t *frames;
+  double *fftw_in;
+  const char *client_name;
+  const char *server_name;
+  const char **ports;
 } NubJackData;
 
 const int PI = 3.14159254;
 
 double window(jack_default_audio_sample_t in, int n);
 int process(jack_nframes_t nframes, void *args);
+

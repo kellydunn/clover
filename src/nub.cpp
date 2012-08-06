@@ -1,33 +1,50 @@
+#include "nub-jack.h"
 #include "nub.h"
 
 GstBus * bus;
-GstElement *sol, *vert;
-GstElement *ffmpegcolor;
+GstElement *ffmpegcolor2;
 GstElement *sink_bin;
 static GMainLoop *loop;
 
+NubJackData nub_jack_init();
+jack_port_t * input_port_l;
+jack_port_t * input_port_r;
+NubData *global_data;
+
 int main(int argc, char **argv) {
   NubData data;
+  global_data = &data;
+  NubJackData jack_data = nub_jack_init();
   GstBus *bus;
   GstMessage *msg;
   gboolean terminate = FALSE;
 
   gst_init(&argc, &argv);
+  data.nub_jack_data = &jack_data;
 
+  // Processing elements
   data.source = gst_element_factory_make("filesrc", "source");
   data.decoder = gst_element_factory_make("decodebin2", "uridecoder");
   data.sink = gst_element_factory_make("autovideosink", "autodetect");
 
+  // Effect Elements
+  data.ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
+  ffmpegcolor2 = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace2");
+  data.vert = gst_element_factory_make("vertigotv", "effectv");
+  data.sol = gst_element_factory_make("solarize", "gaudieffects");
+
+  // Pipeline and bins
   data.pipeline = gst_pipeline_new("nub-pipeline");
   data.processing_bin = gst_bin_new("nub-processing-bin");
 
-  if (!data.pipeline || !data.source || !data.decoder || !data.sink || !data.processing_bin) {
-    g_printerr ("Not all elements could be created.\n");
-    return -1;
-  }
+  // Processing Bin
+  gst_bin_add_many(GST_BIN(data.processing_bin), data.decoder,
+                   data.ffmpegcolor, data.sol, ffmpegcolor2, data.sink, NULL);
+  gst_element_link_many(data.ffmpegcolor, data.sol, ffmpegcolor2, data.sink, NULL);
 
-  gst_bin_add_many(GST_BIN(data.processing_bin), data.decoder, data.sink, NULL);
-  gst_element_add_pad(data.processing_bin, gst_ghost_pad_new("bin_sink", gst_element_get_static_pad(data.decoder, "sink")));
+  gst_element_add_pad(data.processing_bin,
+                      gst_ghost_pad_new("bin_sink",
+                                        gst_element_get_static_pad(data.decoder, "sink")));
 
   g_signal_connect(data.decoder, "pad-added", G_CALLBACK(gst_pad_added), &data);
 
@@ -38,7 +55,6 @@ int main(int argc, char **argv) {
   }
 
   g_object_set(data.source, "location", "/home/kelly/Videos/shogun-assassin.avi", NULL);
-
   gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
   bus = gst_element_get_bus (data.pipeline);
 
@@ -90,7 +106,7 @@ int main(int argc, char **argv) {
 }
 
 static void gst_pad_added(GstElement *src, GstPad *new_pad, NubData *data) {
-  GstPad *sink_pad = gst_element_get_static_pad(data->sink, "sink");
+  GstPad *sink_pad = gst_element_get_static_pad(data->ffmpegcolor, "sink");
   GstPadLinkReturn ret;
   GstCaps *new_pad_caps = NULL;
   GstStructure *new_pad_struct = NULL;
@@ -123,4 +139,64 @@ exit:
   }
 
   gst_object_unref(sink_pad);
+}
+
+double window(NubJackData * data, jack_default_audio_sample_t in, int n) {
+  return .5 * (1 - cos(2*PI*n/(int)data->frames)) * (double)in;
+}
+
+int process(jack_nframes_t nframes, void *args){
+  NubJackData *data = (NubJackData*)args;
+
+  jack_default_audio_sample_t *input_r;
+  jack_default_audio_sample_t *input_l;
+  int i;
+
+  input_r = (jack_default_audio_sample_t *)jack_port_get_buffer(data->input_port_r, nframes);
+  input_l = (jack_default_audio_sample_t *)jack_port_get_buffer(data->input_port_l, nframes);
+  (jack_default_audio_sample_t *)jack_port_get_buffer(data->output_port_r, nframes);
+  (jack_default_audio_sample_t *)jack_port_get_buffer(data->output_port_l, nframes);
+  for (i = 0; i < nframes; i++) {
+    data->fftw_in[i] = window(data, ((input_l[i] + input_r[i])/2), i);
+  }
+
+  int val = (((int)(data->fftw_in[256]*100000)) % 200);
+
+  if(val > 0.0) {
+    //g_object_set(global_data->vert, "speed", val, NULL);
+    g_object_set(global_data->sol, "threshold", (int)val,NULL);
+  }
+  return 0;
+}
+
+NubJackData nub_jack_init() {
+  NubJackData data;
+
+  data.options = JackNoStartServer;
+  data.client_name = "nub";
+  data.server_name = NULL;
+
+  data.client = jack_client_open(data.client_name, data.options, &data.status, data.server_name);
+  if(data.client == NULL) {
+    fprintf(stderr, "Could not open a connection to the JACK server.  Is JACK running?\n");
+  }
+
+  jack_set_process_callback(data.client, process, (void*)&data);
+  jack_activate(data.client);
+
+  data.frames = (jack_nframes_t *)jack_get_buffer_size(data.client);
+  data.fftw_in = (double *)fftw_malloc((int)data.frames * sizeof(double));
+
+  data.input_port_l = jack_port_register(data.client, "group_mix_in:l", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+  data.input_port_r = jack_port_register(data.client, "group_mix_in:r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+  data.output_port_l = jack_port_register(data.client, "master_out:l", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+  data.output_port_r = jack_port_register(data.client, "master_out:r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+  data.ports = jack_get_ports(data.client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
+
+  if(data.ports != NULL) {
+    jack_connect(data.client, jack_port_name(data.output_port_l), data.ports[0]);
+    jack_connect(data.client, jack_port_name(data.output_port_r), data.ports[0]);
+  }
+
+  return data;
 }
