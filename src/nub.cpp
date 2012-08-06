@@ -160,7 +160,7 @@ int process(jack_nframes_t nframes, void *args){
     data->fftw_in[i] = window(data, ((input_l[i] + input_r[i])/2), i);
   }
 
-  int val = (((int)(data->fftw_in[256]*100000)) % 200);
+  int val = (((int)(data->fftw_in[512]*5000)) % 200);
 
   if(val > 0.0) {
     //g_object_set(global_data->vert, "speed", val, NULL);
@@ -186,6 +186,7 @@ NubJackData nub_jack_init() {
 
   data.frames = (jack_nframes_t *)jack_get_buffer_size(data.client);
   data.fftw_in = (double *)fftw_malloc((int)data.frames * sizeof(double));
+  data.fftw_out = (fftw_complex *)fftw_malloc((int)data.frames * sizeof(double));
 
   data.input_port_l = jack_port_register(data.client, "group_mix_in:l", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
   data.input_port_r = jack_port_register(data.client, "group_mix_in:r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);

@@ -13,6 +13,7 @@ typedef struct _NubJackData {
   jack_port_t *output_port_l;
   jack_nframes_t *frames;
   double *fftw_in;
+  fftw_complex *fftw_out;
   const char *client_name;
   const char *server_name;
   const char **ports;
