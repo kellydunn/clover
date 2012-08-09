@@ -11,27 +11,42 @@ void clover_jack_init(clover_jack_t * jack);
 void clover_gst_init(clover_gst_t * gst) {
   // Processing elements
   gst = (clover_gst_t *)malloc(sizeof(clover_gst_t));
+
   printf("Pre-playing\n");
   gst->source = gst_element_factory_make("filesrc", "source");
   gst->decoder = gst_element_factory_make("decodebin2", "uridecoder");
   gst->sink = gst_element_factory_make("autovideosink", "autodetect");
-  printf("Created processing elements!\n");
+
+  if(!gst->source | !gst->decoder | !gst->sink){
+    printf("There was an error creating the processing elements.\n");
+  } else {
+    printf("Created processing elements!\n");
+  }
 
   // Effect Elements
   gst->ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
   gst->ffmpegcolor2 = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace2");
   gst->vert = gst_element_factory_make("vertigotv", "effectv");
   gst->sol = gst_element_factory_make("solarize", "gaudieffects");
-  printf("Created effect elements!\n");
+
+  if(!gst->ffmpegcolor | !gst->ffmpegcolor2 | !gst->vert | !gst->sol){
+    printf("There was an error creating the effect elements.\n");
+  } else {
+    printf("Created effect elements!\n");
+  }
 
   // Pipeline and bins
   gst->pipeline = gst_pipeline_new("clover-pipeline");
   gst->processing_bin = gst_bin_new("clover-processing-bin");
-  printf("Created pipeline!\n");
+  if(!gst->pipeline | !gst->processing_bin){
+    printf("There was an error creating the processing bin.\n");
+  } else {
+    printf("Created pipeline!\n");
+  }
 
   // Processing Bin
-  gst_bin_add_many(GST_BIN(gst->processing_bin), gst->decoder,
-                   gst->ffmpegcolor, gst->sol, gst->ffmpegcolor2, gst->sink, NULL);
+  gst_bin_add_many(GST_BIN(gst->processing_bin),
+                   gst->decoder, gst->ffmpegcolor, gst->sol, gst->ffmpegcolor2, gst->sink, NULL);
 
   gst_element_link_many(gst->ffmpegcolor, gst->sol, gst->ffmpegcolor2, gst->sink, NULL);
 
@@ -66,6 +81,10 @@ int main(int argc, char **argv) {
 
   clover_gst_init(gst);
   global_gst = gst;
+
+  if(&gst->pipeline==NULL) {
+    printf("wat");
+  }
 
   gst_element_set_state(gst->pipeline, GST_STATE_PLAYING);
   bus = gst_element_get_bus (gst->pipeline);
@@ -118,6 +137,7 @@ int main(int argc, char **argv) {
 }
 
 static void gst_pad_added(GstElement *src, GstPad *new_pad, clover_gst_t *gst) {
+  printf("woah");
   GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
   GstPadLinkReturn ret;
   GstCaps *new_pad_caps = NULL;
