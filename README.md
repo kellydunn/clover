@@ -4,6 +4,13 @@
 
 A realtime video manipulation tool using Gstreamer, fueled by FFT analysis of JACK audio data.
 
+## installation
+
+```
+./config
+make
+```
+
 ## deps
 
 - jack
