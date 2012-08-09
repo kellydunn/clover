@@ -7,8 +7,8 @@ jack_port_t * input_port_l;
 jack_port_t * input_port_r;
 clover_gst_t *global_gst;
 
-void clover_jack_init(clover_jack_t * jack);
-void clover_gst_init(clover_gst_t * gst) {
+clover_jack_t * clover_jack_init(clover_jack_t * jack);
+clover_gst_t * clover_gst_init(clover_gst_t * gst) {
   // Processing elements
   gst = (clover_gst_t *)malloc(sizeof(clover_gst_t));
 
@@ -65,6 +65,8 @@ void clover_gst_init(clover_gst_t * gst) {
 
   g_object_set(gst->source, "location", "/home/kelly/Videos/shogun-assassin.avi", NULL);
   printf("Linked source!\n");
+
+  return gst;
 }
 
 int main(int argc, char **argv) {
@@ -74,22 +76,16 @@ int main(int argc, char **argv) {
   GstMessage *msg;
   gboolean terminate = FALSE;
 
-  //clover_jack_t * jack;
-  //clover_jack_init(jack);
+  clover_jack_t * jack;
+  jack = clover_jack_init(jack);
 
   clover_gst_t * gst;
-
-  clover_gst_init(gst);
+  gst = clover_gst_init(gst);
   global_gst = gst;
-
-  if(&gst->pipeline==NULL) {
-    printf("wat");
-  }
 
   gst_element_set_state(gst->pipeline, GST_STATE_PLAYING);
   bus = gst_element_get_bus (gst->pipeline);
 
-  /*
   do {
     msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_ERROR);
 
@@ -132,7 +128,7 @@ int main(int argc, char **argv) {
   gst_object_unref (bus);
   gst_element_set_state (gst->pipeline, GST_STATE_NULL);
   gst_object_unref (gst->pipeline);
-  */
+
   return 0;
 }
 
@@ -201,8 +197,9 @@ int process(jack_nframes_t nframes, void *args){
   return 0;
 }
 
-void clover_jack_init(clover_jack_t * jack) {
-  /*
+clover_jack_t * clover_jack_init(clover_jack_t * jack) {
+  jack = (clover_jack_t*)malloc(sizeof(clover_jack_t));
+
   jack->options = JackNoStartServer;
   jack->client_name = "clover";
   jack->server_name = NULL;
@@ -229,5 +226,6 @@ void clover_jack_init(clover_jack_t * jack) {
     jack_connect(jack->client, jack_port_name(jack->output_port_l), jack->ports[0]);
     jack_connect(jack->client, jack_port_name(jack->output_port_r), jack->ports[0]);
   }
-  */
+
+  return jack;
 }
