@@ -11,6 +11,46 @@ jack_port_t * input_port_l;
 jack_port_t * input_port_r;
 CloverData *global_data;
 
+clover_gst_t * clover_pipeline_init(clover_gst_t * gst) {
+  // Processing elements
+  gst->source = gst_element_factory_make("filesrc", "source");
+  gst->decoder = gst_element_factory_make("decodebin2", "uridecoder");
+  gst->sink = gst_element_factory_make("autovideosink", "autodetect");
+
+  // Effect Elements
+  gst->ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
+  gst->ffmpegcolor2 = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace2");
+  gst->vert = gst_element_factory_make("vertigotv", "effectv");
+  gst->sol = gst_element_factory_make("solarize", "gaudieffects");
+
+  // Pipeline and bins
+  gst->pipeline = gst_pipeline_new("clover-pipeline");
+  gst->processing_bin = gst_bin_new("clover-processing-bin");
+
+  // Processing Bin
+  gst_bin_add_many(GST_BIN(gst->processing_bin), gst->decoder,
+                   gst->ffmpegcolor, gst->sol, gst->ffmpegcolor2, gst->sink, NULL);
+  gst_element_link_many(gst->ffmpegcolor, gst->sol, gst->ffmpegcolor2, gst->sink, NULL);
+
+  gst_element_add_pad(gst->processing_bin,
+                      gst_ghost_pad_new("bin_sink",
+                                        gst_element_get_static_pad(gst->decoder, "sink")));
+  g_signal_connect(gst->decoder, "pad-added", G_CALLBACK(gst_pad_added), gst);
+
+  // Link source video to processing utils
+  gst_bin_add_many(GST_BIN(gst->pipeline), gst->source, gst->processing_bin, NULL);
+  if(gst_element_link(gst->source, gst->processing_bin) != TRUE){
+    printf("Could not link data-source to processing-bin");
+    gst = NULL;
+    goto exit;
+  }
+
+  g_object_set(gst->source, "location", "/home/kelly/Videos/shogun-assassin.avi", NULL);
+
+exit:
+  return gst;
+}
+
 int main(int argc, char **argv) {
   CloverData data;
   global_data = &data;
