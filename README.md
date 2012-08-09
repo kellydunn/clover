@@ -2,14 +2,16 @@
 
 ## what
 
-Don't worry your pretty little head about it.
+A realtime video manipulation tool using Gstreamer, fueled by FFT analysis of JACK audio data.
 
 ## deps
 
-- ljack
-- lgstreamer-0.10
-- lfftw3
+- jack
+- fftw3
+- gstreamer-0.10
+- gstreamer-plugins-base-0.10
 
-## roadmap
+## TODOs
 
-- jack => fft => gstreamer
+- autoconf
+- Learn how to code in C :P
