@@ -23,4 +23,4 @@ const int PI = 3.14159254;
 
 double window(jack_default_audio_sample_t in, int n);
 int process(jack_nframes_t nframes, void *args);
-
+clover_jack_t * clover_jack_init(clover_jack_t * jack);

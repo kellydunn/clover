@@ -1,15 +1,15 @@
 #! /bin/sh
+
+# TODO Needs less cruft
 LDFLAGS="-I/usr/lib/clang/2.8/include -I/usr/include/ "
 LDFLAGS=$LDFLAGS`pkg-config --cflags --libs jack`
 LDFLAGS=$LDFLAGS`pkg-config --cflags --libs fftw3`
 LDFLAGS=$LDFLAGS`pkg-config --cflags --libs gstreamer-0.10`
 LDFLAGS=$LDFLAGS`pkg-config --cflags --libs gstreamer-plugins-base-0.10`
 
-TARGETS="clang $LDFLAGS src/warlock.cpp -o bin/warlock"
+TARGETS="clang $LDFLAGS src/clover.cpp -o bin/clover"
+CONTENT="SHELL=/bin/sh \nall: \n\t $TARGETS"
 
 # Refresh Makefile
 rm Makefile
-cat >> Makefile << EOF
-SHELL=/bin/sh
-all: $TARGETS
-EOF
+echo $CONTENT >> Makefile

@@ -1,13 +1,7 @@
 #include "clover-jack.h"
+#include "clover-gst.h"
 #include "clover.h"
 
-GstBus * bus;
-GstElement *sink_bin;
-jack_port_t * input_port_l;
-jack_port_t * input_port_r;
-clover_gst_t *global_gst;
-
-clover_jack_t * clover_jack_init(clover_jack_t * jack);
 clover_gst_t * clover_gst_init(clover_gst_t * gst) {
   // Processing elements
   gst = (clover_gst_t *)malloc(sizeof(clover_gst_t));
@@ -38,6 +32,7 @@ clover_gst_t * clover_gst_init(clover_gst_t * gst) {
   // Pipeline and bins
   gst->pipeline = gst_pipeline_new("clover-pipeline");
   gst->processing_bin = gst_bin_new("clover-processing-bin");
+
   if(!gst->pipeline | !gst->processing_bin){
     printf("There was an error creating the processing bin.\n");
   } else {
