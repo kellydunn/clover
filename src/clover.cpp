@@ -2,106 +2,78 @@
 #include "clover.h"
 
 GstBus * bus;
-GstElement *ffmpegcolor2;
 GstElement *sink_bin;
-static GMainLoop *loop;
-
-CloverJackData clover_jack_init();
 jack_port_t * input_port_l;
 jack_port_t * input_port_r;
-CloverData *global_data;
+clover_gst_t *global_gst;
 
-clover_gst_t * clover_pipeline_init(clover_gst_t * gst) {
+void clover_jack_init(clover_jack_t * jack);
+void clover_gst_init(clover_gst_t * gst) {
   // Processing elements
+  gst = (clover_gst_t *)malloc(sizeof(clover_gst_t));
+  printf("Pre-playing\n");
   gst->source = gst_element_factory_make("filesrc", "source");
   gst->decoder = gst_element_factory_make("decodebin2", "uridecoder");
   gst->sink = gst_element_factory_make("autovideosink", "autodetect");
+  printf("Created processing elements!\n");
 
   // Effect Elements
   gst->ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
   gst->ffmpegcolor2 = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace2");
   gst->vert = gst_element_factory_make("vertigotv", "effectv");
   gst->sol = gst_element_factory_make("solarize", "gaudieffects");
+  printf("Created effect elements!\n");
 
   // Pipeline and bins
   gst->pipeline = gst_pipeline_new("clover-pipeline");
   gst->processing_bin = gst_bin_new("clover-processing-bin");
+  printf("Created pipeline!\n");
 
   // Processing Bin
   gst_bin_add_many(GST_BIN(gst->processing_bin), gst->decoder,
                    gst->ffmpegcolor, gst->sol, gst->ffmpegcolor2, gst->sink, NULL);
+
   gst_element_link_many(gst->ffmpegcolor, gst->sol, gst->ffmpegcolor2, gst->sink, NULL);
 
   gst_element_add_pad(gst->processing_bin,
                       gst_ghost_pad_new("bin_sink",
                                         gst_element_get_static_pad(gst->decoder, "sink")));
+
   g_signal_connect(gst->decoder, "pad-added", G_CALLBACK(gst_pad_added), gst);
+  printf("Attached processing events!\n");
 
   // Link source video to processing utils
   gst_bin_add_many(GST_BIN(gst->pipeline), gst->source, gst->processing_bin, NULL);
   if(gst_element_link(gst->source, gst->processing_bin) != TRUE){
     printf("Could not link data-source to processing-bin");
-    gst = NULL;
-    goto exit;
   }
 
   g_object_set(gst->source, "location", "/home/kelly/Videos/shogun-assassin.avi", NULL);
-
-exit:
-  return gst;
+  printf("Linked source!\n");
 }
 
 int main(int argc, char **argv) {
-  CloverData data;
-  global_data = &data;
-  CloverJackData jack_data = clover_jack_init();
+  gst_init(&argc, &argv);
+
   GstBus *bus;
   GstMessage *msg;
   gboolean terminate = FALSE;
 
-  gst_init(&argc, &argv);
-  data.clover_jack_data = &jack_data;
+  //clover_jack_t * jack;
+  //clover_jack_init(jack);
 
-  // Processing elements
-  data.source = gst_element_factory_make("filesrc", "source");
-  data.decoder = gst_element_factory_make("decodebin2", "uridecoder");
-  data.sink = gst_element_factory_make("autovideosink", "autodetect");
+  clover_gst_t * gst;
 
-  // Effect Elements
-  data.ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
-  ffmpegcolor2 = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace2");
-  data.vert = gst_element_factory_make("vertigotv", "effectv");
-  data.sol = gst_element_factory_make("solarize", "gaudieffects");
+  clover_gst_init(gst);
+  global_gst = gst;
 
-  // Pipeline and bins
-  data.pipeline = gst_pipeline_new("clover-pipeline");
-  data.processing_bin = gst_bin_new("clover-processing-bin");
+  gst_element_set_state(gst->pipeline, GST_STATE_PLAYING);
+  bus = gst_element_get_bus (gst->pipeline);
 
-  // Processing Bin
-  gst_bin_add_many(GST_BIN(data.processing_bin), data.decoder,
-                   data.ffmpegcolor, data.sol, ffmpegcolor2, data.sink, NULL);
-  gst_element_link_many(data.ffmpegcolor, data.sol, ffmpegcolor2, data.sink, NULL);
-
-  gst_element_add_pad(data.processing_bin,
-                      gst_ghost_pad_new("bin_sink",
-                                        gst_element_get_static_pad(data.decoder, "sink")));
-
-  g_signal_connect(data.decoder, "pad-added", G_CALLBACK(gst_pad_added), &data);
-
-  gst_bin_add_many(GST_BIN(data.pipeline), data.source, data.processing_bin, NULL);
-  if(gst_element_link(data.source, data.processing_bin) != TRUE){
-    printf("Could not link data-source to processing-bin");
-    return -1;
-  }
-
-  g_object_set(data.source, "location", "/home/kelly/Videos/shogun-assassin.avi", NULL);
-  gst_element_set_state(data.pipeline, GST_STATE_PLAYING);
-  bus = gst_element_get_bus (data.pipeline);
-
+  /*
   do {
     msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_ERROR);
 
-    /* Parse message */
     if (msg != NULL) {
       GError *err;
       gchar *debug_info;
@@ -120,8 +92,8 @@ int main(int argc, char **argv) {
         terminate = TRUE;
         break;
       case GST_MESSAGE_STATE_CHANGED:
-        /* We are only interested in state-changed messages from the pipeline */
-        if (GST_MESSAGE_SRC (msg) == GST_OBJECT (data.pipeline)) {
+
+        if (GST_MESSAGE_SRC (msg) == GST_OBJECT (gst->pipeline)) {
           GstState old_state, new_state, pending_state;
           gst_message_parse_state_changed (msg, &old_state, &new_state, &pending_state);
           g_print ("Pipeline state changed from %s to %s:\n",
@@ -129,7 +101,7 @@ int main(int argc, char **argv) {
         }
         break;
       default:
-        /* We should not reach here */
+
         g_printerr ("Unexpected message received.\n");
         break;
       }
@@ -137,16 +109,16 @@ int main(int argc, char **argv) {
     }
   } while (!terminate);
 
-  /* Free resources */
-  gst_object_unref (bus);
-  gst_element_set_state (data.pipeline, GST_STATE_NULL);
-  gst_object_unref (data.pipeline);
 
+  gst_object_unref (bus);
+  gst_element_set_state (gst->pipeline, GST_STATE_NULL);
+  gst_object_unref (gst->pipeline);
+  */
   return 0;
 }
 
-static void gst_pad_added(GstElement *src, GstPad *new_pad, CloverData *data) {
-  GstPad *sink_pad = gst_element_get_static_pad(data->ffmpegcolor, "sink");
+static void gst_pad_added(GstElement *src, GstPad *new_pad, clover_gst_t *gst) {
+  GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
   GstPadLinkReturn ret;
   GstCaps *new_pad_caps = NULL;
   GstStructure *new_pad_struct = NULL;
@@ -181,12 +153,12 @@ exit:
   gst_object_unref(sink_pad);
 }
 
-double window(CloverJackData * data, jack_default_audio_sample_t in, int n) {
-  return .5 * (1 - cos(2*PI*n/(int)data->frames)) * (double)in;
+double window(clover_jack_t * jack, jack_default_audio_sample_t in, int n) {
+  return .5 * (1 - cos(2*PI*n/(int)jack->frames)) * (double)in;
 }
 
 int process(jack_nframes_t nframes, void *args){
-  CloverJackData *data = (CloverJackData*)args;
+  clover_jack_t *data = (clover_jack_t*)args;
 
   jack_default_audio_sample_t *input_r;
   jack_default_audio_sample_t *input_l;
@@ -203,41 +175,39 @@ int process(jack_nframes_t nframes, void *args){
   int val = (((int)(data->fftw_in[512]*5000)) % 200);
 
   if(val > 0.0) {
-    //g_object_set(global_data->vert, "speed", val, NULL);
-    g_object_set(global_data->sol, "threshold", (int)val,NULL);
+    //g_object_set(global_gst->vert, "speed", val, NULL);
+    g_object_set(global_gst->sol, "threshold", (int)val,NULL);
   }
   return 0;
 }
 
-CloverJackData clover_jack_init() {
-  CloverJackData data;
+void clover_jack_init(clover_jack_t * jack) {
+  /*
+  jack->options = JackNoStartServer;
+  jack->client_name = "clover";
+  jack->server_name = NULL;
 
-  data.options = JackNoStartServer;
-  data.client_name = "clover";
-  data.server_name = NULL;
-
-  data.client = jack_client_open(data.client_name, data.options, &data.status, data.server_name);
-  if(data.client == NULL) {
+  jack->client = jack_client_open(jack->client_name, jack->options, &jack->status, jack->server_name);
+  if(jack->client == NULL) {
     fprintf(stderr, "Could not open a connection to the JACK server.  Is JACK running?\n");
   }
 
-  jack_set_process_callback(data.client, process, (void*)&data);
-  jack_activate(data.client);
+  jack_set_process_callback(jack->client, process, (void*)jack);
+  jack_activate(jack->client);
 
-  data.frames = (jack_nframes_t *)jack_get_buffer_size(data.client);
-  data.fftw_in = (double *)fftw_malloc((int)data.frames * sizeof(double));
-  data.fftw_out = (fftw_complex *)fftw_malloc((int)data.frames * sizeof(double));
+  jack->frames = (jack_nframes_t *)jack_get_buffer_size(jack->client);
+  jack->fftw_in = (double *)fftw_malloc((int)jack->frames * sizeof(double));
+  jack->fftw_out = (fftw_complex *)fftw_malloc((int)jack->frames * sizeof(double));
 
-  data.input_port_l = jack_port_register(data.client, "group_mix_in:l", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-  data.input_port_r = jack_port_register(data.client, "group_mix_in:r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-  data.output_port_l = jack_port_register(data.client, "master_out:l", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-  data.output_port_r = jack_port_register(data.client, "master_out:r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-  data.ports = jack_get_ports(data.client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
+  jack->input_port_l = jack_port_register(jack->client, "group_mix_in:l", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+  jack->input_port_r = jack_port_register(jack->client, "group_mix_in:r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+  jack->output_port_l = jack_port_register(jack->client, "master_out:l", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+  jack->output_port_r = jack_port_register(jack->client, "master_out:r", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+  jack->ports = jack_get_ports(jack->client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
 
-  if(data.ports != NULL) {
-    jack_connect(data.client, jack_port_name(data.output_port_l), data.ports[0]);
-    jack_connect(data.client, jack_port_name(data.output_port_r), data.ports[0]);
+  if(jack->ports != NULL) {
+    jack_connect(jack->client, jack_port_name(jack->output_port_l), jack->ports[0]);
+    jack_connect(jack->client, jack_port_name(jack->output_port_r), jack->ports[0]);
   }
-
-  return data;
+  */
 }
