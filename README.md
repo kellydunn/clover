@@ -1,4 +1,13 @@
-# clover
+```
+      ___
+     /\_ \
+  ___\//\ \     ___   __  __     __   _ __
+ /'___\\ \ \   / __`\/\ \/\ \  /'__`\/\`'__\
+/\ \__/ \_\ \_/\ \L\ \ \ \_/ |/\  __/\ \ \/
+\ \____\/\____\ \____/\ \___/ \ \____\\ \_\
+ \/____/\/____/\/___/  \/__/   \/____/ \/_/
+
+```
 
 ## what
 
@@ -25,7 +34,8 @@ Then attach any audio playing on your computer to a jack server and watch your v
 - gstreamer-0.10
 - gstreamer-plugins-base-0.10
 
-## TODOs
+## roadmap
 
-- autoconf
-- Learn how to code in C :P
+- specify your own video effects through some sort of configuration file
+- refactor into an actual C project :P / improve build process
+- integrate into a full gstreamer command line mixin
