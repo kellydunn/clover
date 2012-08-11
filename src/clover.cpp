@@ -6,15 +6,12 @@ clover_gst_t * clover_gst_init(clover_gst_t * gst) {
   // Processing elements
   gst = (clover_gst_t *)malloc(sizeof(clover_gst_t));
 
-  printf("Pre-playing\n");
   gst->source = gst_element_factory_make("filesrc", "source");
   gst->decoder = gst_element_factory_make("decodebin2", "uridecoder");
   gst->sink = gst_element_factory_make("autovideosink", "autodetect");
 
   if(!gst->source | !gst->decoder | !gst->sink){
     printf("There was an error creating the processing elements.\n");
-  } else {
-    printf("Created processing elements!\n");
   }
 
   // Effect Elements
@@ -25,8 +22,6 @@ clover_gst_t * clover_gst_init(clover_gst_t * gst) {
 
   if(!gst->ffmpegcolor | !gst->ffmpegcolor2 | !gst->vert | !gst->sol){
     printf("There was an error creating the effect elements.\n");
-  } else {
-    printf("Created effect elements!\n");
   }
 
   // Pipeline and bins
@@ -35,8 +30,6 @@ clover_gst_t * clover_gst_init(clover_gst_t * gst) {
 
   if(!gst->pipeline | !gst->processing_bin){
     printf("There was an error creating the processing bin.\n");
-  } else {
-    printf("Created pipeline!\n");
   }
 
   // Processing Bin
@@ -50,16 +43,12 @@ clover_gst_t * clover_gst_init(clover_gst_t * gst) {
                                         gst_element_get_static_pad(gst->decoder, "sink")));
 
   g_signal_connect(gst->decoder, "pad-added", G_CALLBACK(gst_pad_added), gst);
-  printf("Attached processing events!\n");
 
   // Link source video to processing utils
   gst_bin_add_many(GST_BIN(gst->pipeline), gst->source, gst->processing_bin, NULL);
   if(gst_element_link(gst->source, gst->processing_bin) != TRUE){
     printf("Could not link data-source to processing-bin");
   }
-
-  g_object_set(gst->source, "location", "/home/kelly/Videos/shogun-assassin.avi", NULL);
-  printf("Linked source!\n");
 
   return gst;
 }
@@ -77,6 +66,14 @@ int main(int argc, char **argv) {
   clover_gst_t * gst;
   gst = clover_gst_init(gst);
   global_gst = gst;
+
+  if(argv[1] == NULL) {
+    printf("No input video file detected.  Please pass in a video file.\n");
+    return -1;
+  }
+
+  g_object_set(gst->source, "location", argv[1], NULL);
+  printf("Linked source!\n");
 
   gst_element_set_state(gst->pipeline, GST_STATE_PLAYING);
   bus = gst_element_get_bus (gst->pipeline);
