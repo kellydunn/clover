@@ -28,4 +28,6 @@ const int PI = 3.14159254;
 double window(jack_default_audio_sample_t in, int n);
 int process(jack_nframes_t nframes, void *args);
 clover_jack_t * clover_jack_init(clover_jack_t * jack);
+jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int nframes);
+jack_port_t * register_port_by_name(clover_jack_t * jack, char * name);
 #endif
