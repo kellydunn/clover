@@ -2,7 +2,7 @@
 
 clover_gst_t * clover_gst_init(clover_gst_t * gst) {
   // Processing elements
-   gst = (clover_gst_t *)malloc(sizeof(clover_gst_t));
+  gst = (clover_gst_t *)malloc(sizeof(clover_gst_t));
 
   gst->source = gst_element_factory_make("filesrc", "source");
   gst->decoder = gst_element_factory_make("decodebin2", "uridecoder");
