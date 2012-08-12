@@ -8,9 +8,11 @@ LDFLAGS=$LDFLAGS`pkg-config --cflags --libs gstreamer-0.10`
 LDFLAGS=$LDFLAGS`pkg-config --cflags --libs gstreamer-plugins-base-0.10`
 
 TARGETS_JACK="clang -c $LDFLAGS src/clover-jack.cpp -o bin/clover-jack.o"
-TARGETS="clang $LDFLAGS src/clover.cpp bin/clover-jack.o -o bin/clover"
+TARGETS_GST="clang -c $LDFLAGS src/clover-gst.cpp -o bin/clover-gst.o"
+TARGETS="clang $LDFLAGS src/clover.cpp bin/clover-jack.o bin/clover-gst.o -o bin/clover"
+
 TARGETS_INSTALL="mv bin/clover /usr/bin/clover"
-CONTENT="SHELL=/bin/sh \nall: \n\t$TARGETS_JACK && $TARGETS \ninstall: \n\t$TARGETS_INSTALL"
+CONTENT="SHELL=/bin/sh \nall: \n\t$TARGETS_JACK && $TARGETS_GST && $TARGETS \ninstall: \n\t$TARGETS_INSTALL"
 
 # Refresh Makefile
 rm Makefile

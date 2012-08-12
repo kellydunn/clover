@@ -1,6 +1,5 @@
 #ifndef CLOVER_GST_H
 #define CLOVER_GST_H
-#include <stdio.h>
 #include <gst/gst.h>
 #include <glib.h>
 
