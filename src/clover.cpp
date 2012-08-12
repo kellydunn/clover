@@ -9,14 +9,17 @@ int main(int argc, char **argv) {
   GstMessage *msg;
   gboolean terminate = FALSE;
 
+  // Initialize JACK Client
   clover_jack_t * jack;
   jack = clover_jack_init(jack);
 
+  // Prepare Gstreamer pipeline
   clover_gst_t * gst;
   gst = clover_gst_init(gst);
 
   jack->clover_gst = gst;
 
+  // TODO Parse command line arguments and throw accordingly
   if(argv[1] == NULL) {
     printf("No input video file detected.  Please pass in a video file.\n");
     return -1;
