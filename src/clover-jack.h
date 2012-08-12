@@ -1,7 +1,10 @@
+#ifndef CLOVER_JACK_H
+#define CLOVER_JACK_H
 #include <stdio.h>
 #include <math.h>
 #include <fftw3.h>
 #include <jack/jack.h>
+#include "clover-gst.h"
 
 typedef struct _clover_jack_t {
   jack_client_t *client;
@@ -17,6 +20,7 @@ typedef struct _clover_jack_t {
   const char *client_name;
   const char *server_name;
   const char **ports;
+  clover_gst_t * clover_gst;
 } clover_jack_t;
 
 const int PI = 3.14159254;
@@ -24,3 +28,4 @@ const int PI = 3.14159254;
 double window(jack_default_audio_sample_t in, int n);
 int process(jack_nframes_t nframes, void *args);
 clover_jack_t * clover_jack_init(clover_jack_t * jack);
+#endif
