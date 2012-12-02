@@ -3,7 +3,7 @@
 #include <fftw3.h>
 
 double window(clover_jack_t * jack, jack_default_audio_sample_t in, int n) {
-  return .5 * (1 - cos((2*PI*n)/((int)jack->frames - 1))) * (double)in;  
+  return .5 * (1 - cos((2*PI*n)/((intptr_t)jack->frames - 1))) * (double)in;  
 }
 
 jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int nframes) {
@@ -33,7 +33,8 @@ int process(jack_nframes_t nframes, void *args){
   fftw_plan p;
   p = fftw_plan_dft_1d(nframes, data->fftw_in, data->fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
   fftw_execute(p);
-  int val = (((int)(data->fftw_in[512]*5000)) % 200);
+  // int val = (((int)(&data->fftw_in[512]*5000)) % 200);
+  int val = 0;
 
   if(val > 0.0) {
     //g_object_set(global_gst->vert, "speed", val, NULL);
@@ -63,8 +64,8 @@ clover_jack_t * clover_jack_init(clover_jack_t * jack) {
   jack_activate(jack->client);
 
   jack->frames = (jack_nframes_t *)jack_get_buffer_size(jack->client);
-  jack->fftw_in = (double *)fftw_malloc((int)jack->frames * sizeof(double));
-  jack->fftw_out = (fftw_complex *)fftw_malloc((int)jack->frames * sizeof(double));
+  jack->fftw_in = (fftw_complex  *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
+  jack->fftw_out = (fftw_complex *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
 
   register_port_by_name(jack, (char *) "group_mix_in:l");
   register_port_by_name(jack, (char *) "group_mix_in:r");
