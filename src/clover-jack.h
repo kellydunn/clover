@@ -15,7 +15,7 @@ typedef struct _clover_jack_t {
   jack_port_t *output_port_r;
   jack_port_t *output_port_l;
   jack_nframes_t *frames;
-  double *fftw_in;
+  fftw_complex *fftw_in;
   fftw_complex *fftw_out;
   const char *client_name;
   const char *server_name;

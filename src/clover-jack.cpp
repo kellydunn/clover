@@ -1,8 +1,9 @@
 #include "clover-gst.h"
 #include "clover-jack.h"
+#include <fftw3.h>
 
 double window(clover_jack_t * jack, jack_default_audio_sample_t in, int n) {
-  return .5 * (1 - cos(2*PI*n/(int)jack->frames)) * (double)in;
+  return .5 * (1 - cos((2*PI*n)/((int)jack->frames - 1))) * (double)in;  
 }
 
 jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int nframes) {
@@ -23,10 +24,15 @@ int process(jack_nframes_t nframes, void *args){
   output_l = get_audio_sample_from_port(data->output_port_l, nframes);
 
   int i;
+  // Spec: apply a window function to N samples to data
   for (i = 0; i < nframes; i++) {
     data->fftw_in[i] = window(data, ((input_l[i] + input_r[i])/2), i);
   }
 
+  // Spec: 
+  fftw_plan p;
+  p = fftw_plan_dft_1d(nframes, data->fftw_in, data->fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
+  fftw_execute(p);
   int val = (((int)(data->fftw_in[512]*5000)) % 200);
 
   if(val > 0.0) {
