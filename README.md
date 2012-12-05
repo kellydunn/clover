@@ -16,7 +16,6 @@ A realtime video manipulation tool using Gstreamer, fueled by FFT analysis of JA
 ## installation
 
 ```
-./config
 make
 sudo make install   # assumes /usr/bin is in your $PATH
 ```

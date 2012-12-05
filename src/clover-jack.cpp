@@ -3,7 +3,7 @@
 #include <fftw3.h>
 
 double window(clover_jack_t * jack, jack_default_audio_sample_t in, int n) {
-  return .5 * (1 - cos((2*PI*n)/((intptr_t)jack->frames - 1))) * (double)in;  
+  return .5 * (1 - cos((2*PI*n)/((intptr_t)jack->frames))) * (double)in;  
 }
 
 jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int nframes) {
@@ -18,6 +18,7 @@ int process(jack_nframes_t nframes, void *args){
   jack_default_audio_sample_t *output_r;
   jack_default_audio_sample_t *output_l;
 
+
   input_r = get_audio_sample_from_port(data->input_port_r, nframes);
   input_l = get_audio_sample_from_port(data->input_port_l, nframes);
   output_r = get_audio_sample_from_port(data->output_port_r, nframes);
@@ -30,16 +31,16 @@ int process(jack_nframes_t nframes, void *args){
   }
 
   // Spec: 
-  fftw_plan p;
-  p = fftw_plan_dft_1d(nframes, data->fftw_in, data->fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
-  fftw_execute(p);
-  // int val = (((int)(&data->fftw_in[512]*5000)) % 200);
-  int val = 0;
+  //fftw_plan p;
+  //p = fftw_plan_dft_1d(nframes, data->fftw_in, data->fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
+  //fftw_execute(p);
+  int val = ((intptr_t)(&data->fftw_in[512]) * 5000) % 200;
 
   if(val > 0.0) {
     //g_object_set(global_gst->vert, "speed", val, NULL);
     g_object_set(data->clover_gst->sol, "threshold", (int)val,NULL);
   }
+
   return 0;
 }
 
@@ -60,24 +61,25 @@ clover_jack_t * clover_jack_init(clover_jack_t * jack) {
     fprintf(stderr, "Could not open a connection to the JACK server.  Is JACK running?\n");
   }
 
+  jack->input_port_l = register_port_by_name(jack, (char *) "group_mix_in:l");
+  jack->input_port_r = register_port_by_name(jack, (char *) "group_mix_in:r");
+  jack->output_port_l = register_port_by_name(jack, (char *) "master_out:l");
+  jack->output_port_r = register_port_by_name(jack, (char *) "master_out:r");
+
   jack_set_process_callback(jack->client, process, (void*)jack);
   jack_activate(jack->client);
 
   jack->frames = (jack_nframes_t *)jack_get_buffer_size(jack->client);
-  jack->fftw_in = (fftw_complex  *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
+  jack->fftw_in = (double *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
   jack->fftw_out = (fftw_complex *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
 
-  register_port_by_name(jack, (char *) "group_mix_in:l");
-  register_port_by_name(jack, (char *) "group_mix_in:r");
-  register_port_by_name(jack, (char *) "master_out:l");
-  register_port_by_name(jack, (char *) "master_out:r");
-
+  /*
   jack->ports = jack_get_ports(jack->client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
 
   if(jack->ports != NULL) {
     jack_connect(jack->client, jack_port_name(jack->output_port_l), jack->ports[0]);
     jack_connect(jack->client, jack_port_name(jack->output_port_r), jack->ports[0]);
   }
-
+  */
   return jack;
 }
