@@ -31,9 +31,10 @@ int process(jack_nframes_t nframes, void *args){
   }
 
   // Spec: 
-  //fftw_plan p;
-  //p = fftw_plan_dft_1d(nframes, data->fftw_in, data->fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
+  fftw_plan p;
+  p = fftw_plan_dft_1d(nframes, (fftw_complex*) data->fftw_in, data->fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
   //fftw_execute(p);
+
   int val = ((intptr_t)(&data->fftw_in[512]) * 5000) % 200;
 
   if(val > 0.0) {
@@ -66,20 +67,18 @@ clover_jack_t * clover_jack_init(clover_jack_t * jack) {
   jack->output_port_l = register_port_by_name(jack, (char *) "master_out:l");
   jack->output_port_r = register_port_by_name(jack, (char *) "master_out:r");
 
-  jack_set_process_callback(jack->client, process, (void*)jack);
-  jack_activate(jack->client);
-
   jack->frames = (jack_nframes_t *)jack_get_buffer_size(jack->client);
   jack->fftw_in = (double *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
   jack->fftw_out = (fftw_complex *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
 
-  /*
+  jack_set_process_callback(jack->client, process, (void*)jack);
+  jack_activate(jack->client);
+
   jack->ports = jack_get_ports(jack->client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
 
   if(jack->ports != NULL) {
     jack_connect(jack->client, jack_port_name(jack->output_port_l), jack->ports[0]);
     jack_connect(jack->client, jack_port_name(jack->output_port_r), jack->ports[0]);
   }
-  */
   return jack;
 }
