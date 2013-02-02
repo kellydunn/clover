@@ -4,6 +4,8 @@ clover_gst_t * clover_gst_init(clover_gst_t * gst) {
   // Processing elements
   gst = (clover_gst_t *)malloc(sizeof(clover_gst_t));
 
+  // Initialize general framework for the pipeline
+  // TODO Abstract this out into seperate function
   gst->source = gst_element_factory_make("filesrc", "source");
   gst->decoder = gst_element_factory_make("decodebin2", "uridecoder");
   gst->sink = gst_element_factory_make("autovideosink", "autodetect");
@@ -13,6 +15,7 @@ clover_gst_t * clover_gst_init(clover_gst_t * gst) {
   }
 
   // Effect Elements
+  // TODO Abstract this out into seperate function
   gst->ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
   gst->ffmpegcolor2 = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace2");
   gst->vert = gst_element_factory_make("vertigotv", "effectv");
@@ -31,6 +34,7 @@ clover_gst_t * clover_gst_init(clover_gst_t * gst) {
   }
 
   // Processing Bin
+  // TODO Add effects based on configuration file
   gst_bin_add_many(GST_BIN(gst->processing_bin),
                    gst->decoder, gst->ffmpegcolor, gst->sol, gst->ffmpegcolor2, gst->sink, NULL);
 
@@ -51,8 +55,10 @@ clover_gst_t * clover_gst_init(clover_gst_t * gst) {
   return gst;
 }
 
+// The Gstreamer callback function
+// Fairly standard, this callback simply forwards the media through the pipeline.
+// TODO Look up doxygen style form of documentation 
 static void gst_pad_added(GstElement *src, GstPad *new_pad, clover_gst_t *gst) {
-  printf("woah");
   GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
   GstPadLinkReturn ret;
   GstCaps *new_pad_caps = NULL;

@@ -67,7 +67,7 @@ clover_jack_t * clover_jack_init(clover_jack_t * jack) {
   jack->output_port_l = register_port_by_name(jack, (char *) "master_out:l");
   jack->output_port_r = register_port_by_name(jack, (char *) "master_out:r");
 
-  jack->frames = (jack_nframes_t *)jack_get_buffer_size(jack->client);
+  jack->frames = (jack_nframes_t *) jack_get_buffer_size(jack->client);
   jack->fftw_in = (double *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
   jack->fftw_out = (fftw_complex *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
 

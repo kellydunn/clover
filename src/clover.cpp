@@ -1,7 +1,11 @@
+// The main executable for clover
+//   - initializes JACK client and Gstreamer pipeline
+//   - play video file
+
 #include "clover-jack.h"
 #include "clover-gst.h"
 #include "clover.h"
-
+ 
 int main(int argc, char **argv) {
   gst_init(&argc, &argv);
 
@@ -31,6 +35,7 @@ int main(int argc, char **argv) {
   gst_element_set_state(gst->pipeline, GST_STATE_PLAYING);
   bus = gst_element_get_bus (gst->pipeline);
 
+  // TODO Place this in clover-gst, or whatever.
   do {
     msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_ERROR);
 
@@ -68,7 +73,6 @@ int main(int argc, char **argv) {
       gst_message_unref (msg);
     }
   } while (!terminate);
-
 
   gst_object_unref (bus);
   gst_element_set_state (gst->pipeline, GST_STATE_NULL);

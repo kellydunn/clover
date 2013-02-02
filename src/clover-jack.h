@@ -23,7 +23,8 @@ typedef struct _clover_jack_t {
   clover_gst_t * clover_gst;
 } clover_jack_t;
 
-const int PI = 3.14159254;
+// const int PI = 3.14159254;
+const float PI = 3.14159254;
 
 double window(jack_default_audio_sample_t in, int n);
 int process(jack_nframes_t nframes, void *args);
