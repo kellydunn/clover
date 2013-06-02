@@ -1,5 +1,5 @@
-#include "clover-gst.h"
-#include "clover-jack.h"
+#include "gstreamer-client.h"
+#include "jack-client.h"
 #include <fftw3.h>
 
 double window(clover_jack_t * jack, jack_default_audio_sample_t in, int n) {
@@ -47,6 +47,45 @@ int process(jack_nframes_t nframes, void *args){
 
 jack_port_t * register_port_by_name(clover_jack_t * jack, char * name) {
   return jack_port_register(jack->client, name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+}
+
+jack_port_t * JackClient::register_port_by_name(char * name) {
+  return jack_port_register(client, name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+}
+
+void JackClient::set_gstreamer_client(clover_gst_t * clover_gst) {
+  this->clover_gst = clover_gst;
+}
+
+JackClient::JackClient() {
+  options = JackNoStartServer;
+  client_name = "clover";
+  server_name = NULL;
+
+  client = jack_client_open(client_name, options, &status, server_name);
+
+  if(client == NULL) {
+    fprintf(stderr, "Could not open a connection to the JACK server.  Is JACK running?\n");
+  }
+
+  input_port_l = register_port_by_name((char *) "group_mix_in:l");
+  input_port_r = register_port_by_name((char *) "group_mix_in:r");
+  output_port_l = register_port_by_name((char *) "master_out:l");
+  output_port_r = register_port_by_name((char *) "master_out:r");
+
+  frames = (jack_nframes_t *) jack_get_buffer_size(client);
+  fftw_in = (double *)fftw_malloc((intptr_t) frames * sizeof(double));
+  fftw_out = (fftw_complex *)fftw_malloc((intptr_t) frames * sizeof(double));
+
+  jack_set_process_callback(client, process, (void*)this);
+  jack_activate(client);
+
+  ports = jack_get_ports(client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
+
+  if(ports != NULL) {
+    jack_connect(client, jack_port_name(output_port_l), ports[0]);
+    jack_connect(client, jack_port_name(output_port_r), ports[0]);
+  }  
 }
 
 clover_jack_t * clover_jack_init(clover_jack_t * jack) {

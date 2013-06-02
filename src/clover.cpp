@@ -2,10 +2,12 @@
 //   - initializes JACK client and Gstreamer pipeline
 //   - play video file
 
-#include "clover-jack.h"
-#include "clover-gst.h"
+#include "clover/jack-client.h"
+#include "clover/gstreamer-client.h"
 #include "clover.h"
- 
+
+class Clover {};
+
 int main(int argc, char **argv) {
   gst_init(&argc, &argv);
 
@@ -13,15 +15,15 @@ int main(int argc, char **argv) {
   GstMessage *msg;
   gboolean terminate = FALSE;
 
-  // Initialize JACK Client
-  clover_jack_t * jack;
-  jack = clover_jack_init(jack);
+  JackClient jack;
 
-  // Prepare Gstreamer pipeline
   clover_gst_t * gst;
   gst = clover_gst_init(gst);
 
-  jack->clover_gst = gst;
+  // TODO The gstreamer client should run seperately
+  //      and should not need to know about jack and vice-versa.  
+  //      This should be handled by a nother class.
+  jack.set_gstreamer_client(gst);
 
   // TODO Parse command line arguments and throw accordingly
   if(argv[1] == NULL) {
