@@ -60,6 +60,7 @@ void JackClient::set_gstreamer_client(GstreamerClient * clover_gst) {
   this->clover_gst = clover_gst;
 }
 
+// Creates a new JackClient.
 JackClient::JackClient() {
   options = JackNoStartServer;
   client_name = "clover";
