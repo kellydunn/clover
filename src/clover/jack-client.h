@@ -1,3 +1,5 @@
+// This describes the fields and functionality of a JackClient
+
 #ifndef CLOVER_JACK_H
 #define CLOVER_JACK_H
 
