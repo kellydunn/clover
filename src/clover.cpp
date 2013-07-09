@@ -17,13 +17,16 @@ int main(int argc, char **argv) {
 
   JackClient jack;
 
-  clover_gst_t * gst;
-  gst = clover_gst_init(gst);
+  GstreamerClient gst;
+  gst = GstreamerClient();
+  GstreamerClient * gst_ref = &gst;
+  //clover_gst_t * gst;
+  // gst = clover_gst_init(gst);
 
   // TODO The gstreamer client should run seperately
   //      and should not need to know about jack and vice-versa.  
   //      This should be handled by a nother class.
-  jack.set_gstreamer_client(gst);
+  jack.set_gstreamer_client(gst_ref);
 
   // TODO Parse command line arguments and throw accordingly
   if(argv[1] == NULL) {
@@ -31,11 +34,11 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  g_object_set(gst->source, "location", argv[1], NULL);
+  g_object_set(gst_ref->source, "location", argv[1], NULL);
   printf("Linked source!\n");
 
-  gst_element_set_state(gst->pipeline, GST_STATE_PLAYING);
-  bus = gst_element_get_bus (gst->pipeline);
+  gst_element_set_state(gst_ref->pipeline, GST_STATE_PLAYING);
+  bus = gst_element_get_bus (gst_ref->pipeline);
 
   // TODO Place this in clover-gst, or whatever.
   do {
@@ -60,7 +63,7 @@ int main(int argc, char **argv) {
         break;
       case GST_MESSAGE_STATE_CHANGED:
 
-        if (GST_MESSAGE_SRC (msg) == GST_OBJECT (gst->pipeline)) {
+        if (GST_MESSAGE_SRC (msg) == GST_OBJECT (gst_ref->pipeline)) {
           GstState old_state, new_state, pending_state;
           gst_message_parse_state_changed (msg, &old_state, &new_state, &pending_state);
           g_print ("Pipeline state changed from %s to %s:\n",
@@ -77,8 +80,8 @@ int main(int argc, char **argv) {
   } while (!terminate);
 
   gst_object_unref (bus);
-  gst_element_set_state (gst->pipeline, GST_STATE_NULL);
-  gst_object_unref (gst->pipeline);
+  gst_element_set_state (gst_ref->pipeline, GST_STATE_NULL);
+  gst_object_unref (gst_ref->pipeline);
 
   return 0;
 }

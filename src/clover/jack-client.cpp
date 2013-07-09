@@ -53,7 +53,8 @@ jack_port_t * JackClient::register_port_by_name(char * name) {
   return jack_port_register(client, name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
 }
 
-void JackClient::set_gstreamer_client(clover_gst_t * clover_gst) {
+//void JackClient::set_gstreamer_client(clover_gst_t * clover_gst) {
+void JackClient::set_gstreamer_client(GstreamerClient * clover_gst) {
   this->clover_gst = clover_gst;
 }
 

@@ -41,10 +41,12 @@ class JackClient {
     
     JackClient();
     jack_port_t * register_port_by_name(char *);
-    void set_gstreamer_client(clover_gst_t * clover_gst);
+    //void set_gstreamer_client(clover_gst_t * clover_gst);
+    void set_gstreamer_client(GstreamerClient * clover_gst);
 
   private:
-    clover_gst_t * clover_gst;
+    GstreamerClient * clover_gst;
+    // clover_gst_t * clover_gst;
 }; 
 
 // const int PI = 3.14159254;

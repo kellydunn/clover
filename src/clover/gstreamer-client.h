@@ -33,6 +33,6 @@ class GstreamerClient {
     static void pad_added(GstElement *, GstPad *, GstreamerClient *);
 };
 
-static void gst_pad_added(GstElement *src, GstPad *new_pad, clover_gst_t *data);
-clover_gst_t * clover_gst_init(clover_gst_t * gst);
+//static void gst_pad_added(GstElement *src, GstPad *new_pad, clover_gst_t *data);
+//clover_gst_t * clover_gst_init(clover_gst_t * gst);
 #endif

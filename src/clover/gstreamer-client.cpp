@@ -50,6 +50,8 @@ GstreamerClient::GstreamerClient() {
   }
 }
 
+// DEPRECATED
+/*
 clover_gst_t * clover_gst_init(clover_gst_t * gst) {
   // Processing elements
   gst = (clover_gst_t *)malloc(sizeof(clover_gst_t));
@@ -103,10 +105,10 @@ clover_gst_t * clover_gst_init(clover_gst_t * gst) {
 
   return gst;
 }
+*/
 
-// The Gstreamer callback function
-// Fairly standard, this callback simply forwards the media through the pipeline.
-// TODO Look up doxygen style form of documentation 
+// DEPRECATED
+/*
 static void gst_pad_added(GstElement *src, GstPad *new_pad, clover_gst_t *gst) {
   GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
   GstPadLinkReturn ret;
@@ -142,6 +144,7 @@ exit:
 
   gst_object_unref(sink_pad);
 }
+*/
 
 // The Gstreamer callback function
 // Fairly standard, this callback simply forwards the media through the pipeline.
