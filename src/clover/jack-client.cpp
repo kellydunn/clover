@@ -3,10 +3,6 @@
 #include <jack/jack.h>
 #include <fftw3.h>
 
-double JackClient::window(jack_default_audio_sample_t in, int n) {
-  return .5 * (1 - cos((2*PI*n)/((intptr_t)this->frames))) * (double)in;
-}
-
 jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int nframes) {
   return (jack_default_audio_sample_t *)jack_port_get_buffer(port, nframes);
 }
@@ -46,6 +42,10 @@ int process(jack_nframes_t nframes, void *args){
   }
 
   return 0;
+}
+
+double JackClient::window(jack_default_audio_sample_t in, int n) {
+  return .5 * (1 - cos((2*PI*n)/((intptr_t)this->frames))) * (double)in;
 }
 
 jack_port_t * JackClient::register_port_by_name(char * name) {
@@ -90,39 +90,3 @@ JackClient::JackClient() {
     jack_connect(client, jack_port_name(output_port_r), ports[0]);
   }  
 }
-
-/*
-clover_jack_t * clover_jack_init(clover_jack_t * jack) {
-  jack = (clover_jack_t*)malloc(sizeof(clover_jack_t));
-
-  jack->options = JackNoStartServer;
-  jack->client_name = "clover";
-  jack->server_name = NULL;
-
-  jack->client = jack_client_open(jack->client_name, jack->options, &jack->status, jack->server_name);
-
-  if(jack->client == NULL) {
-    fprintf(stderr, "Could not open a connection to the JACK server.  Is JACK running?\n");
-  }
-
-  jack->input_port_l = register_port_by_name(jack, (char *) "group_mix_in:l");
-  jack->input_port_r = register_port_by_name(jack, (char *) "group_mix_in:r");
-  jack->output_port_l = register_port_by_name(jack, (char *) "master_out:l");
-  jack->output_port_r = register_port_by_name(jack, (char *) "master_out:r");
-
-  jack->frames = (jack_nframes_t *) jack_get_buffer_size(jack->client);
-  jack->fftw_in = (double *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
-  jack->fftw_out = (fftw_complex *)fftw_malloc((intptr_t)jack->frames * sizeof(double));
-
-  jack_set_process_callback(jack->client, process, (void*)jack);
-  jack_activate(jack->client);
-
-  jack->ports = jack_get_ports(jack->client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
-
-  if(jack->ports != NULL) {
-    jack_connect(jack->client, jack_port_name(jack->output_port_l), jack->ports[0]);
-    jack_connect(jack->client, jack_port_name(jack->output_port_r), jack->ports[0]);
-  }
-  return jack;
-}
-*/
