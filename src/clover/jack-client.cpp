@@ -1,9 +1,10 @@
 #include "gstreamer-client.h"
 #include "jack-client.h"
+#include <jack/jack.h>
 #include <fftw3.h>
 
-double window(clover_jack_t * jack, jack_default_audio_sample_t in, int n) {
-  return .5 * (1 - cos((2*PI*n)/((intptr_t)jack->frames))) * (double)in;  
+double JackClient::window(jack_default_audio_sample_t in, int n) {
+  return .5 * (1 - cos((2*PI*n)/((intptr_t)this->frames))) * (double)in;
 }
 
 jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int nframes) {
@@ -11,7 +12,8 @@ jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int
 }
 
 int process(jack_nframes_t nframes, void *args){
-  clover_jack_t *data = (clover_jack_t*)args;
+  JackClient * jack_client_ref = (JackClient*) args;
+  JackClient data = *jack_client_ref;
 
   jack_default_audio_sample_t *input_r;
   jack_default_audio_sample_t *input_l;
@@ -19,41 +21,41 @@ int process(jack_nframes_t nframes, void *args){
   jack_default_audio_sample_t *output_l;
 
 
-  input_r = get_audio_sample_from_port(data->input_port_r, nframes);
-  input_l = get_audio_sample_from_port(data->input_port_l, nframes);
-  output_r = get_audio_sample_from_port(data->output_port_r, nframes);
-  output_l = get_audio_sample_from_port(data->output_port_l, nframes);
+  input_r = get_audio_sample_from_port(data.input_port_r, nframes);
+  input_l = get_audio_sample_from_port(data.input_port_l, nframes);
+  output_r = get_audio_sample_from_port(data.output_port_r, nframes);
+  output_l = get_audio_sample_from_port(data.output_port_l, nframes);
 
   int i;
   // Spec: apply a window function to N samples to data
   for (i = 0; i < nframes; i++) {
-    data->fftw_in[i] = window(data, ((input_l[i] + input_r[i])/2), i);
+    data.fftw_in[i] = data.window(((input_l[i] + input_r[i])/2), i);
   }
 
   // Spec: 
   fftw_plan p;
-  p = fftw_plan_dft_1d(nframes, (fftw_complex*) data->fftw_in, data->fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
+  p = fftw_plan_dft_1d(nframes, (fftw_complex*) data.fftw_in, data.fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
   //fftw_execute(p);
 
-  int val = ((intptr_t)(&data->fftw_in[512]) * 5000) % 200;
+  int val = ((intptr_t)(&data.fftw_in[512]) * 5000) % 200;
 
   if(val > 0.0) {
     //g_object_set(global_gst->vert, "speed", val, NULL);
-    g_object_set(data->clover_gst->sol, "threshold", (int)val,NULL);
+    GstreamerClient * gst = data.get_gstreamer_client();
+    g_object_set(gst->sol, "threshold", (int)val,NULL);
   }
 
   return 0;
-}
-
-jack_port_t * register_port_by_name(clover_jack_t * jack, char * name) {
-  return jack_port_register(jack->client, name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
 }
 
 jack_port_t * JackClient::register_port_by_name(char * name) {
   return jack_port_register(client, name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
 }
 
-//void JackClient::set_gstreamer_client(clover_gst_t * clover_gst) {
+GstreamerClient * JackClient::get_gstreamer_client() {
+  return this->clover_gst;
+}
+
 void JackClient::set_gstreamer_client(GstreamerClient * clover_gst) {
   this->clover_gst = clover_gst;
 }
@@ -89,6 +91,7 @@ JackClient::JackClient() {
   }  
 }
 
+/*
 clover_jack_t * clover_jack_init(clover_jack_t * jack) {
   jack = (clover_jack_t*)malloc(sizeof(clover_jack_t));
 
@@ -122,3 +125,4 @@ clover_jack_t * clover_jack_init(clover_jack_t * jack) {
   }
   return jack;
 }
+*/

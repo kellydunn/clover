@@ -3,6 +3,7 @@
 #include <gst/gst.h>
 #include <glib.h>
 
+/*
 typedef struct _clover_gst_t {
   GstElement *pipeline;
   GstElement *source;
@@ -15,6 +16,7 @@ typedef struct _clover_gst_t {
   GstElement *vert;
   GstElement *sol;
 } clover_gst_t;
+*/
 
 class GstreamerClient {
   public:
@@ -33,6 +35,4 @@ class GstreamerClient {
     static void pad_added(GstElement *, GstPad *, GstreamerClient *);
 };
 
-//static void gst_pad_added(GstElement *src, GstPad *new_pad, clover_gst_t *data);
-//clover_gst_t * clover_gst_init(clover_gst_t * gst);
 #endif
