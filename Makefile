@@ -1,6 +1,6 @@
 CC=clang
-LDFLAGS=$(shell pkg-config --libs jack fftw3 gstreamer-0.10 gstreamer-plugins-base-0.10)
-CFLAGS=$(shell pkg-config --cflags jack fftw3 gstreamer-0.10 gstreamer-plugins-base-0.10)
+LDFLAGS=$(shell pkg-config --libs jack fftw3 gstreamer-0.10 gstreamer-plugins-base-0.10 gtk+-3.0)
+CFLAGS=$(shell pkg-config --cflags jack fftw3 gstreamer-0.10 gstreamer-plugins-base-0.10 gtk+-3.0)
 
 all:
 	$(CC) -c $(LDFLAGS) $(CFLAGS) src/clover/jack-client.cpp -o bin/jack-client.o

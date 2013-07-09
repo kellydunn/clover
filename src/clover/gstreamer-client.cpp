@@ -1,5 +1,7 @@
 #include <gst/gst.h>
+#include <gtk/gtk.h>
 #include "gstreamer-client.h"
+#include <glib-object.h>
 
 GstreamerClient::GstreamerClient() {
   // Initialize general framework for the pipeline
@@ -39,7 +41,7 @@ GstreamerClient::GstreamerClient() {
 
   gst_element_add_pad(processing_bin, gst_ghost_pad_new("bin_sink", gst_element_get_static_pad(decoder, "sink")));
 
-  g_signal_connect(decoder, "pad-added", G_CALLBACK(GstreamerClient::pad_added), *this);
+  g_signal_connect(decoder, "pad-added", G_CALLBACK(GstreamerClient::pad_added), (gpointer)this);
 
   // Link source video to processing utils
   gst_bin_add_many(GST_BIN(pipeline), source, processing_bin, NULL);
