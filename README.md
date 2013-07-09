@@ -7,6 +7,7 @@
 \ \____\/\____\ \____/\ \___/ \ \____\\ \_\
  \/____/\/____/\/___/  \/__/   \/____/ \/_/
 
+trippy~
 ```
 
 ## what
@@ -22,6 +23,7 @@ sudo make install   # assumes /usr/bin is in your $PATH
 
 ## usage
 ```
+# start a jack server
 clover /path/to/your/video
 ```
 Then attach any audio playing on your computer to a jack server and watch your video go crazy.
@@ -36,5 +38,3 @@ Then attach any audio playing on your computer to a jack server and watch your v
 ## roadmap
 
 - specify your own video effects through some sort of configuration file
-- refactor into an actual C project :P / improve build process
-- integrate into a full gstreamer command line mixin
