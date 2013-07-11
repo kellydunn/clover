@@ -34,9 +34,13 @@ GstreamerClient::GstreamerClient() {
   }
 
   // Processing Bin
-  // TODO Add effects based on configuration file
+  // TODO Add effects based on configuration file one by one, and then  null terminate it.
   gst_bin_add_many(GST_BIN(processing_bin), decoder, ffmpegcolor, sol, ffmpegcolor2, sink, NULL);
 
+
+  // TODO link elements based on configuration file one by one, and then null teriminated it.
+  // NOTE visual effects appear to need their own ffmpegcolor start pad and sink pad.  
+  //      Investigate linking all visual effects first, then linking to sink.
   gst_element_link_many(ffmpegcolor, sol, ffmpegcolor2, sink, NULL);
 
   gst_element_add_pad(processing_bin, gst_ghost_pad_new("bin_sink", gst_element_get_static_pad(decoder, "sink")));
@@ -50,10 +54,13 @@ GstreamerClient::GstreamerClient() {
   }
 }
 
-// The Gstreamer callback function
-// Fairly standard, this callback simply forwards the media through the pipeline.
-// TODO Look up doxygen style form of documentation 
-void GstreamerClient::pad_added(GstElement *src, GstPad *new_pad, GstreamerClient *gst) {
+// @pre The passed in {GstPad} has yet to be processed by the passed in {GstreamerClient} pipeline.
+// @post The passed in {GstPad} has been processed by the passed in {GstreamerClient} pipeline.
+// @param {GstElement} src.  A pointer to the source of the new {GstPad}.  
+//                           For clover's purposes, this should only be a video source.
+// @param {GstPad} new_pad.  A pointer to the pad that was generated during processing the demuxed video.
+// @param {GstreamerClient} gst.  A pointer to the instance of the GstreamerClient that is processing video.
+void GstreamerClient::pad_added(GstElement *src, GstPad *new_pad, GstreamerClient * gst) {
   GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
   GstPadLinkReturn ret;
   GstCaps *new_pad_caps = NULL;
