@@ -31,14 +31,19 @@ int process(jack_nframes_t nframes, void *args){
   // Spec: 
   fftw_plan p;
   p = fftw_plan_dft_1d(nframes, (fftw_complex*) data.fftw_in, data.fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
-  //fftw_execute(p);
+  fftw_execute(p);
 
-  int val = ((intptr_t)(&data.fftw_in[512]) * 5000) % 200;
+  int val = ((intptr_t)(data.fftw_out[512]) * 5000) % 200;
 
   if(val > 0.0) {
     //g_object_set(global_gst->vert, "speed", val, NULL);
     GstreamerClient * gst = data.get_gstreamer_client();
     g_object_set(gst->sol, "threshold", (int)val,NULL);
+  }
+
+  printf("Input:    \tOutput:\n");
+  for(i=0;i<512;i++) {
+    printf("%f\t%f\n", data.fftw_in[i], &data.fftw_out[i]);
   }
 
   return 0;
@@ -66,28 +71,28 @@ JackClient::JackClient() {
   client_name = "clover";
   server_name = NULL;
 
-  client = jack_client_open(client_name, options, &status, server_name);
+  this->client = jack_client_open(client_name, options, &status, server_name);
 
   if(client == NULL) {
     fprintf(stderr, "Could not open a connection to the JACK server.  Is JACK running?\n");
   }
 
-  input_port_l = register_port_by_name((char *) "group_mix_in:l");
-  input_port_r = register_port_by_name((char *) "group_mix_in:r");
-  output_port_l = register_port_by_name((char *) "master_out:l");
-  output_port_r = register_port_by_name((char *) "master_out:r");
+  this->input_port_l = register_port_by_name((char *) "group_mix_in:l");
+  this->input_port_r = register_port_by_name((char *) "group_mix_in:r");
+  this->output_port_l = register_port_by_name((char *) "master_out:l");
+  this->output_port_r = register_port_by_name((char *) "master_out:r");
 
-  frames = (jack_nframes_t *) jack_get_buffer_size(client);
-  fftw_in = (double *)fftw_malloc((intptr_t) frames * sizeof(double));
-  fftw_out = (fftw_complex *)fftw_malloc((intptr_t) frames * sizeof(double));
+  this->frames = (jack_nframes_t *) jack_get_buffer_size(this->client);
+  this->fftw_in = (double *)fftw_malloc((intptr_t) frames * sizeof(double));
+  this->fftw_out = (fftw_complex *)fftw_malloc((intptr_t) frames * sizeof(double));
 
-  jack_set_process_callback(client, process, (void*)this);
-  jack_activate(client);
+  jack_set_process_callback(this->client, process, (void*)this);
+  jack_activate(this->client);
 
-  ports = jack_get_ports(client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
+  ports = jack_get_ports(this->client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
 
   if(ports != NULL) {
-    jack_connect(client, jack_port_name(output_port_l), ports[0]);
-    jack_connect(client, jack_port_name(output_port_r), ports[0]);
+    jack_connect(this->client, jack_port_name(this->output_port_l), ports[0]);
+    jack_connect(this->client, jack_port_name(this->output_port_r), ports[0]);
   }  
 }
