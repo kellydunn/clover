@@ -1,15 +1,15 @@
 // This describes the fields and functionality of a GstreamerClient.
 
-#ifndef CLOVER_GST_H
-#define CLOVER_GST_H
+#ifndef _VISUALIZER_H
+#define _VISUALIZER_H
 
 #include <gst/gst.h>
 #include <glib.h>
 
-class GstreamerClient {
+class Visualizer {
   public:
     GstElement *pipeline;
-    GstElement *source;
+    //GstElement *source;
     GstElement *decoder;
     GstElement *sink;
     GstElement *processing_bin;
@@ -19,8 +19,13 @@ class GstreamerClient {
     GstElement *vert;
     GstElement *sol;
 
-    GstreamerClient();
-    static void pad_added(GstElement *, GstPad *, GstreamerClient *);
+    Visualizer();
+    void set_source_element();
+    GstElement * get_source_element();
+    static void pad_added(GstElement *, GstPad *, Visualizer *);
+
+  private:
+    GstElement *source;
 };
 
 #endif

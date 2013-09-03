@@ -3,10 +3,8 @@
 //   - play video file
 
 #include "clover/jack-client.h"
-#include "clover/gstreamer-client.h"
+#include "clover/visualizer.h"
 #include "clover.h"
-
-class Clover {};
 
 int main(int argc, char **argv) {
   gst_init(&argc, &argv);
@@ -17,9 +15,8 @@ int main(int argc, char **argv) {
 
   JackClient jack;
 
-  GstreamerClient gst;
-  gst = GstreamerClient();
-  GstreamerClient * gst_ref = &gst;
+  Visualizer gst = Visualizer();
+  Visualizer * gst_ref = &gst;
   //clover_gst_t * gst;
   // gst = clover_gst_init(gst);
 
@@ -34,7 +31,7 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  g_object_set(gst_ref->source, "location", argv[1], NULL);
+  g_object_set(gst_ref->get_source_element(), "location", argv[1], NULL);
   printf("Linked source!\n");
 
   gst_element_set_state(gst_ref->pipeline, GST_STATE_PLAYING);

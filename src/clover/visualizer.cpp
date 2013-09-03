@@ -1,16 +1,17 @@
 #include <gst/gst.h>
 #include <gtk/gtk.h>
-#include "gstreamer-client.h"
+#include "visualizer.h"
 #include <glib-object.h>
 
-GstreamerClient::GstreamerClient() {
+Visualizer::Visualizer() {
   // Initialize general framework for the pipeline
   // TODO Abstract this out into seperate function
-  source = gst_element_factory_make("filesrc", "source");
+  //source = gst_element_factory_make("filesrc", "source");
+  set_source_element();
   decoder = gst_element_factory_make("decodebin2", "uridecoder");
   sink = gst_element_factory_make("autovideosink", "autodetect");
 
-  if(!source | !decoder | !sink){
+  if(!this->source | !decoder | !sink){
     printf("There was an error creating the processing elements.\n");
   }
 
@@ -45,13 +46,21 @@ GstreamerClient::GstreamerClient() {
 
   gst_element_add_pad(processing_bin, gst_ghost_pad_new("bin_sink", gst_element_get_static_pad(decoder, "sink")));
 
-  g_signal_connect(decoder, "pad-added", G_CALLBACK(GstreamerClient::pad_added), (gpointer)this);
+  g_signal_connect(decoder, "pad-added", G_CALLBACK(Visualizer::pad_added), (gpointer)this);
 
   // Link source video to processing utils
-  gst_bin_add_many(GST_BIN(pipeline), source, processing_bin, NULL);
-  if(gst_element_link(source, processing_bin) != TRUE){
+  gst_bin_add_many(GST_BIN(pipeline), this->source, processing_bin, NULL);
+  if(gst_element_link(this->source, processing_bin) != TRUE){
     printf("Could not link data-source to processing-bin");
   }
+}
+
+void Visualizer::set_source_element() {
+  this->source = gst_element_factory_make("filesrc", "source");
+}
+
+GstElement * Visualizer::get_source_element() {
+  return this->source;
 }
 
 // @pre The passed in {GstPad} has yet to be processed by the passed in {GstreamerClient} pipeline.
@@ -60,7 +69,7 @@ GstreamerClient::GstreamerClient() {
 //                           For clover's purposes, this should only be a video source.
 // @param {GstPad} new_pad.  A pointer to the pad that was generated during processing the demuxed video.
 // @param {GstreamerClient} gst.  A pointer to the instance of the GstreamerClient that is processing video.
-void GstreamerClient::pad_added(GstElement *src, GstPad *new_pad, GstreamerClient * gst) {
+void Visualizer::pad_added(GstElement *src, GstPad *new_pad, Visualizer * gst) {
   GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
   GstPadLinkReturn ret;
   GstCaps *new_pad_caps = NULL;

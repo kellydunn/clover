@@ -7,7 +7,7 @@
 #include <math.h>
 #include <fftw3.h>
 #include <jack/jack.h>
-#include "gstreamer-client.h"
+#include "visualizer.h" // TODO this should not be needed
 
 class JackClient {
   public:
@@ -27,12 +27,18 @@ class JackClient {
     
     JackClient();
     jack_port_t * register_port_by_name(char *);
-    void set_gstreamer_client(GstreamerClient * clover_gst);
-    GstreamerClient * get_gstreamer_client();
+    void set_gstreamer_client(Visualizer * clover_gst);
+
+    // TODO We should be getting this from the Clover class, or otherwise 
+    //      Refactor to have responsibility for this fucntionality elsewhere
+    Visualizer * get_gstreamer_client(); 
+                                         
     double window(jack_default_audio_sample_t in, int n);
 
   private:
-    GstreamerClient * clover_gst;
+    // TODO We should be getting this from the Clover class, or otherwise 
+    //      Refactor to have responsibility for this fucntionality elsewhere
+    Visualizer * clover_gst;
 }; 
 
 const float PI = 3.14159254;

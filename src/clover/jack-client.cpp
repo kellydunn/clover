@@ -1,4 +1,4 @@
-#include "gstreamer-client.h"
+#include "visualizer.h"
 #include "jack-client.h"
 #include <jack/jack.h>
 #include <fftw3.h>
@@ -37,7 +37,7 @@ int process(jack_nframes_t nframes, void *args){
 
   if(val > 0.0) {
     //g_object_set(global_gst->vert, "speed", val, NULL);
-    GstreamerClient * gst = data.get_gstreamer_client();
+    Visualizer * gst = data.get_gstreamer_client();
     g_object_set(gst->sol, "threshold", (int)val,NULL);
   }
 
@@ -57,11 +57,11 @@ jack_port_t * JackClient::register_port_by_name(char * name) {
   return jack_port_register(client, name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
 }
 
-GstreamerClient * JackClient::get_gstreamer_client() {
+Visualizer * JackClient::get_gstreamer_client() {
   return this->clover_gst;
 }
 
-void JackClient::set_gstreamer_client(GstreamerClient * clover_gst) {
+void JackClient::set_gstreamer_client(Visualizer * clover_gst) {
   this->clover_gst = clover_gst;
 }
 
