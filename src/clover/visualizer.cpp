@@ -7,7 +7,7 @@ Visualizer::Visualizer() {
   // Initialize general framework for the pipeline
   // TODO Abstract this out into seperate function
   //source = gst_element_factory_make("filesrc", "source");
-  set_source_element();
+  this->set_source((char *) "filesrc", (char *) "source");
   decoder = gst_element_factory_make("decodebin2", "uridecoder");
   sink = gst_element_factory_make("autovideosink", "autodetect");
 
@@ -55,11 +55,11 @@ Visualizer::Visualizer() {
   }
 }
 
-void Visualizer::set_source_element() {
-  this->source = gst_element_factory_make("filesrc", "source");
+void Visualizer::set_source(char * type, char * name) {
+  this->source = gst_element_factory_make(type, name);
 }
 
-GstElement * Visualizer::get_source_element() {
+GstElement * Visualizer::get_source() {
   return this->source;
 }
 

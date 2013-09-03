@@ -6,8 +6,32 @@
 #include "clover/visualizer.h"
 #include "clover.h"
 
+Clover::Clover() {
+  Visualizer vis = Visualizer();
+  this->visualizer = &vis;
+
+  JackClient jack;
+  this->jack_client = &jack;  
+}
+
+void Clover::set_visualizer_source(char * src) {
+  g_object_set(this->visualizer->get_source(), "location", src, NULL);
+}
+
+void Clover::play() {
+
+}
+
 int main(int argc, char **argv) {
+  if(argv[1] == NULL) {
+    printf("No input video file detected.  Please pass in a video file.\n");
+    return -1;
+  }
+
   gst_init(&argc, &argv);
+
+  Clover clover = Clover();
+  clover.set_visualizer_source((char *) argv[1]);
 
   GstBus *bus;
   GstMessage *msg;
@@ -23,16 +47,9 @@ int main(int argc, char **argv) {
   // TODO The gstreamer client should run seperately
   //      and should not need to know about jack and vice-versa.  
   //      This should be handled by a nother class.
-  jack.set_gstreamer_client(gst_ref);
+  // jack.set_gstreamer_client(this->visualizer);
 
   // TODO Parse command line arguments and throw accordingly
-  if(argv[1] == NULL) {
-    printf("No input video file detected.  Please pass in a video file.\n");
-    return -1;
-  }
-
-  g_object_set(gst_ref->get_source_element(), "location", argv[1], NULL);
-  printf("Linked source!\n");
 
   gst_element_set_state(gst_ref->pipeline, GST_STATE_PLAYING);
   bus = gst_element_get_bus (gst_ref->pipeline);

@@ -9,7 +9,6 @@
 class Visualizer {
   public:
     GstElement *pipeline;
-    //GstElement *source;
     GstElement *decoder;
     GstElement *sink;
     GstElement *processing_bin;
@@ -19,9 +18,17 @@ class Visualizer {
     GstElement *vert;
     GstElement *sol;
 
+    // Constructor
     Visualizer();
-    void set_source_element();
-    GstElement * get_source_element();
+
+    // source for Gstreamer pipeline
+    void set_source(char *, char *);
+    GstElement * get_source();
+
+    // decoder for Gstreamer pipeline
+    void set_decoder(char *, char *);
+    GstElement * get_decoder();
+
     static void pad_added(GstElement *, GstPad *, Visualizer *);
 
   private:
