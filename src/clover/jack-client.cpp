@@ -8,18 +8,13 @@ jack_default_audio_sample_t * JackClient::get_audio_sample_from_port(jack_port_t
 }
 
 int JackClient::process(jack_nframes_t nframes, void *args){
-  JackClient * jack_client_ref = (JackClient*) args;
-  JackClient data = *jack_client_ref;
+  JackClient * ref = (JackClient*) args;
+  JackClient data = *ref;
 
-  jack_default_audio_sample_t *input_r;
-  jack_default_audio_sample_t *input_l;
-  jack_default_audio_sample_t *output_r;
-  jack_default_audio_sample_t *output_l;
-
-  input_r = jack_client_ref->get_audio_sample_from_port(data.input_port_r, nframes);
-  input_l = jack_client_ref->get_audio_sample_from_port(data.input_port_l, nframes);
-  output_r = jack_client_ref->get_audio_sample_from_port(data.output_port_r, nframes);
-  output_l = jack_client_ref->get_audio_sample_from_port(data.output_port_l, nframes);
+  jack_default_audio_sample_t *input_r = ref->get_audio_sample_from_port(data.input_port_r, nframes);
+  jack_default_audio_sample_t *input_l = ref->get_audio_sample_from_port(data.input_port_l, nframes);
+  jack_default_audio_sample_t *output_r = ref->get_audio_sample_from_port(data.output_port_r, nframes);
+  jack_default_audio_sample_t *output_l = ref->get_audio_sample_from_port(data.output_port_l, nframes);
 
   int i;
   // Spec: apply a window function to N samples to data
