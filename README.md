@@ -28,6 +28,15 @@ clover /path/to/your/video
 ```
 Then attach any audio playing on your computer to a jack server and watch your video go crazy.
 
+## tests
+
+This project currently uses libcheck to provide test coverage.  In order to run the tests, you may issue the following commands:
+
+```
+make
+make test
+```
+
 ## deps
 
 - jack

@@ -13,8 +13,6 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  gst_init(&argc, &argv);
-
   Clover clover = Clover(&argc, &argv);
   clover.set_visualizer_source((char *) argv[1]);
 
@@ -22,24 +20,18 @@ int main(int argc, char **argv) {
   GstMessage *msg;
   gboolean terminate = FALSE;
 
-  JackClient jack;
-
-  Visualizer gst = Visualizer();
-  Visualizer * gst_ref = &gst;
-  //clover_gst_t * gst;
-  // gst = clover_gst_init(gst);
+  JackClient * jack = clover.get_jack_client();
+  Visualizer * gst_ref = clover.get_visualizer();
 
   // TODO The gstreamer client should run seperately
   //      and should not need to know about jack and vice-versa.  
   //      This should be handled by a nother class.
-  // jack.set_gstreamer_client(this->visualizer);
+  jack->set_gstreamer_client(clover.get_visualizer());
 
   // TODO Parse command line arguments and throw accordingly
-
   gst_element_set_state(gst_ref->pipeline, GST_STATE_PLAYING);
   bus = gst_element_get_bus (gst_ref->pipeline);
 
-  // TODO Place this in clover-gst, or whatever.
   do {
     msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, GST_MESSAGE_ERROR);
 
@@ -48,6 +40,7 @@ int main(int argc, char **argv) {
       gchar *debug_info;
 
       switch (GST_MESSAGE_TYPE (msg)) {
+        
       case GST_MESSAGE_ERROR:
         gst_message_parse_error (msg, &err, &debug_info);
         g_printerr ("Error received from element %s: %s\n", GST_OBJECT_NAME (msg->src), err->message);
@@ -56,26 +49,34 @@ int main(int argc, char **argv) {
         g_free (debug_info);
         terminate = TRUE;
         break;
+
       case GST_MESSAGE_EOS:
         g_print ("End-Of-Stream reached.\n");
         terminate = TRUE;
         break;
+
       case GST_MESSAGE_STATE_CHANGED:
 
         if (GST_MESSAGE_SRC (msg) == GST_OBJECT (gst_ref->pipeline)) {
           GstState old_state, new_state, pending_state;
           gst_message_parse_state_changed (msg, &old_state, &new_state, &pending_state);
-          g_print ("Pipeline state changed from %s to %s:\n",
-                   gst_element_state_get_name (old_state), gst_element_state_get_name (new_state));
+
+          g_print ("Pipeline state changed from %s to %s:\n", 
+                   gst_element_state_get_name (old_state), 
+                   gst_element_state_get_name (new_state));
+
         }
         break;
-      default:
 
+      default:
         g_printerr ("Unexpected message received.\n");
         break;
       }
+
       gst_message_unref (msg);
+
     }
+
   } while (!terminate);
 
   gst_object_unref (bus);

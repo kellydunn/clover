@@ -16,7 +16,6 @@ int process(jack_nframes_t nframes, void *args){
   jack_default_audio_sample_t *output_r;
   jack_default_audio_sample_t *output_l;
 
-
   input_r = get_audio_sample_from_port(data.input_port_r, nframes);
   input_l = get_audio_sample_from_port(data.input_port_l, nframes);
   output_r = get_audio_sample_from_port(data.output_port_r, nframes);
@@ -41,10 +40,13 @@ int process(jack_nframes_t nframes, void *args){
     g_object_set(gst->sol, "threshold", (int)val,NULL);
   }
 
-  printf("Input:    \tOutput:\n");
+  // The first bin in the FFT is DC (0 Hz), the second bin is Fs / N, where Fs is the sample rate and N is the size of the FFT. 
+  // The next bin is 2 * Fs / N. To express this in general terms, the nth bin is n * Fs / N.
+
   for(i=0;i<512;i++) {
-    printf("%f\t%f\n", data.fftw_in[i], &data.fftw_out[i]);
+    printf("%f\t%f", data.fftw_in[(i * 44100 / 1024)], &data.fftw_out[(i * 44100 / 1024)]);
   }
+  printf("\n");
 
   return 0;
 }
@@ -73,7 +75,7 @@ JackClient::JackClient() {
 
   this->client = jack_client_open(client_name, options, &status, server_name);
 
-  if(client == NULL) {
+  if(this->client == NULL) {
     fprintf(stderr, "Could not open a connection to the JACK server.  Is JACK running?\n");
   }
 
@@ -92,6 +94,7 @@ JackClient::JackClient() {
   ports = jack_get_ports(this->client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
 
   if(ports != NULL) {
+    printf("Attempting to connect ports...\n");
     jack_connect(this->client, jack_port_name(this->output_port_l), ports[0]);
     jack_connect(this->client, jack_port_name(this->output_port_r), ports[0]);
   }  

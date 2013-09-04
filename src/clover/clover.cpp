@@ -12,7 +12,7 @@ Clover::Clover(int * argc, char *** argv) {
   Visualizer vis = Visualizer();
   this->visualizer = &vis;
 
-  JackClient jack;
+  JackClient jack = JackClient();
   this->jack_client = &jack;  
 }
 
