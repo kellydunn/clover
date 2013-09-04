@@ -31,9 +31,10 @@ class JackClient {
 
     // TODO We should be getting this from the Clover class, or otherwise 
     //      Refactor to have responsibility for this fucntionality elsewhere
-    Visualizer * get_gstreamer_client(); 
-                                         
+    Visualizer * get_gstreamer_client();                                          
     double window(jack_default_audio_sample_t in, int n);
+    jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int nframes);
+    static int process(jack_nframes_t nframes, void * args);
 
   private:
     // TODO We should be getting this from the Clover class, or otherwise 

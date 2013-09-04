@@ -3,11 +3,11 @@
 #include <jack/jack.h>
 #include <fftw3.h>
 
-jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int nframes) {
+jack_default_audio_sample_t * JackClient::get_audio_sample_from_port(jack_port_t * port, int nframes) {
   return (jack_default_audio_sample_t *)jack_port_get_buffer(port, nframes);
 }
 
-int process(jack_nframes_t nframes, void *args){
+int JackClient::process(jack_nframes_t nframes, void *args){
   JackClient * jack_client_ref = (JackClient*) args;
   JackClient data = *jack_client_ref;
 
@@ -16,10 +16,10 @@ int process(jack_nframes_t nframes, void *args){
   jack_default_audio_sample_t *output_r;
   jack_default_audio_sample_t *output_l;
 
-  input_r = get_audio_sample_from_port(data.input_port_r, nframes);
-  input_l = get_audio_sample_from_port(data.input_port_l, nframes);
-  output_r = get_audio_sample_from_port(data.output_port_r, nframes);
-  output_l = get_audio_sample_from_port(data.output_port_l, nframes);
+  input_r = jack_client_ref->get_audio_sample_from_port(data.input_port_r, nframes);
+  input_l = jack_client_ref->get_audio_sample_from_port(data.input_port_l, nframes);
+  output_r = jack_client_ref->get_audio_sample_from_port(data.output_port_r, nframes);
+  output_l = jack_client_ref->get_audio_sample_from_port(data.output_port_l, nframes);
 
   int i;
   // Spec: apply a window function to N samples to data
@@ -88,7 +88,7 @@ JackClient::JackClient() {
   this->fftw_in = (double *)fftw_malloc((intptr_t) frames * sizeof(double));
   this->fftw_out = (fftw_complex *)fftw_malloc((intptr_t) frames * sizeof(double));
 
-  jack_set_process_callback(this->client, process, (void*)this);
+  jack_set_process_callback(this->client, JackClient::process, (void*)this);
   jack_activate(this->client);
 
   ports = jack_get_ports(this->client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
