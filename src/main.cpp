@@ -1,26 +1,8 @@
-// The main executable for clover
-//   - initializes JACK client and Gstreamer pipeline
-//   - play video file
-
+#include <stdlib.h>
+#include <gst/gst.h>
+#include "clover/clover.h"
 #include "clover/jack-client.h"
 #include "clover/visualizer.h"
-#include "clover.h"
-
-Clover::Clover() {
-  Visualizer vis = Visualizer();
-  this->visualizer = &vis;
-
-  JackClient jack;
-  this->jack_client = &jack;  
-}
-
-void Clover::set_visualizer_source(char * src) {
-  g_object_set(this->visualizer->get_source(), "location", src, NULL);
-}
-
-void Clover::play() {
-
-}
 
 int main(int argc, char **argv) {
   if(argv[1] == NULL) {
@@ -99,4 +81,3 @@ int main(int argc, char **argv) {
 
   return 0;
 }
-

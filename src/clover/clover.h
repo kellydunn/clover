@@ -2,12 +2,9 @@
 #define _CLOVER_H
 
 #include <stdio.h>
-#include "clover/visualizer.h"
-
-GstBus * bus;
-GstElement *sink_bin;
-jack_port_t * input_port_l;
-jack_port_t * input_port_r;
+#include <jack/jack.h>
+#include "visualizer.h"
+#include "jack-client.h"
 
 class Clover {
   public:
@@ -15,6 +12,8 @@ class Clover {
     Clover();
     void set_visualizer_source(char *);
     void play();
+    Visualizer * get_visualizer();
+    JackClient * get_jack_client();
 
   private:
     Visualizer * visualizer;
