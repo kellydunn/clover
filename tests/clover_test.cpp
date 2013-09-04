@@ -3,7 +3,7 @@
 #include "../src/clover/clover.h"
 
 START_TEST (test_new_clover) {
-  Clover clover = Clover();
+  Clover clover = Clover(NULL, NULL);
   Clover * clover_ref = &clover;
   fail_if(clover_ref->get_visualizer() == NULL, "source element is null");
 } END_TEST

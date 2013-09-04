@@ -6,7 +6,9 @@
 #include "visualizer.h"
 #include "clover.h"
 
-Clover::Clover() {
+Clover::Clover(int * argc, char *** argv) {
+  gst_init(argc, argv);
+
   Visualizer vis = Visualizer();
   this->visualizer = &vis;
 

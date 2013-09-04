@@ -9,7 +9,7 @@
 class Clover {
   public:
 
-    Clover();
+    Clover(int * argc, char ***argv);
     void set_visualizer_source(char *);
     void play();
     Visualizer * get_visualizer();

@@ -1,3 +1,6 @@
+// This is the main entry point for clover.
+// Initializes all intresting classes, and begins accepting audio to guide visual effects.
+
 #include <stdlib.h>
 #include <gst/gst.h>
 #include "clover/clover.h"
@@ -12,7 +15,7 @@ int main(int argc, char **argv) {
 
   gst_init(&argc, &argv);
 
-  Clover clover = Clover();
+  Clover clover = Clover(&argc, &argv);
   clover.set_visualizer_source((char *) argv[1]);
 
   GstBus *bus;
