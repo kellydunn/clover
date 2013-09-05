@@ -44,6 +44,11 @@ make test
 - gstreamer-0.10
 - gstreamer-plugins-base-0.10
 
+If you're using video accelerated apis (vaapi), you might need to download the appropriate drivers for your video card as well as any additional codecs.  On my Arch System I needed to install the following:
+
+- gstreamer0.10-vaapi
+- libva-intel-driver
+
 ## roadmap
 
 - specify your own video effects through some sort of configuration file

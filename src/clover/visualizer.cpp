@@ -6,51 +6,51 @@
 Visualizer::Visualizer() {
   // Initialize general framework for the pipeline
   // TODO Abstract this out into seperate function
-  //source = gst_element_factory_make("filesrc", "source");
-  this->set_source((char *) "filesrc", (char *) "source");
-  decoder = gst_element_factory_make("decodebin2", "uridecoder");
-  sink = gst_element_factory_make("autovideosink", "autodetect");
+  this->source =  gst_element_factory_make("filesrc", "source");
+  //this->set_source((char *) "filesrc", (char *) "source");
+  this->decoder = gst_element_factory_make("decodebin2", "uridecoder");
+  this->sink = gst_element_factory_make("autovideosink", "autodetect");
 
-  if(!this->source | !decoder | !sink){
+  if(!this->source | !this->decoder | !this->sink){
     printf("There was an error creating the processing elements.\n");
   }
 
   // Effect Elements
   // TODO Abstract this out into seperate function
-  ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
-  ffmpegcolor2 = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace2");
-  vert = gst_element_factory_make("vertigotv", "effectv");
-  sol = gst_element_factory_make("solarize", "gaudieffects");
+  this->ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
+  this->ffmpegcolor2 = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace2");
+  this->vert = gst_element_factory_make("vertigotv", "effectv");
+  this->sol = gst_element_factory_make("solarize", "gaudieffects");
 
-  if(!ffmpegcolor | !ffmpegcolor2 | !vert | !sol){
+  if(!this->ffmpegcolor | !this->ffmpegcolor2 | !this->vert | !this->sol){
     printf("There was an error creating the effect elements.\n");
   }
 
   // Pipeline and bins
-  pipeline = gst_pipeline_new("clover-pipeline");
-  processing_bin = gst_bin_new("clover-processing-bin");
+  this->pipeline = gst_pipeline_new("clover-pipeline");
+  this->processing_bin = gst_bin_new("clover-processing-bin");
 
-  if(!pipeline | !processing_bin){
+  if(!this->pipeline | !this->processing_bin){
     printf("There was an error creating the processing bin.\n");
   }
 
   // Processing Bin
   // TODO Add effects based on configuration file one by one, and then  null terminate it.
-  gst_bin_add_many(GST_BIN(processing_bin), decoder, ffmpegcolor, sol, ffmpegcolor2, sink, NULL);
+  gst_bin_add_many(GST_BIN(this->processing_bin), this->decoder, this->ffmpegcolor, this->sol, this->ffmpegcolor2, this->sink, NULL);
 
 
   // TODO link elements based on configuration file one by one, and then null teriminated it.
   // NOTE visual effects appear to need their own ffmpegcolor start pad and sink pad.  
   //      Investigate linking all visual effects first, then linking to sink.
-  gst_element_link_many(ffmpegcolor, sol, ffmpegcolor2, sink, NULL);
+  gst_element_link_many(this->ffmpegcolor, this->sol, this->ffmpegcolor2, this->sink, NULL);
 
-  gst_element_add_pad(processing_bin, gst_ghost_pad_new("bin_sink", gst_element_get_static_pad(decoder, "sink")));
+  gst_element_add_pad(this->processing_bin, gst_ghost_pad_new("bin_sink", gst_element_get_static_pad(this->decoder, "sink")));
 
-  g_signal_connect(decoder, "pad-added", G_CALLBACK(Visualizer::pad_added), (gpointer)this);
+  g_signal_connect(this->decoder, "pad-added", G_CALLBACK(Visualizer::pad_added), (gpointer)this);
 
   // Link source video to processing utils
-  gst_bin_add_many(GST_BIN(pipeline), this->source, processing_bin, NULL);
-  if(gst_element_link(this->source, processing_bin) != TRUE){
+  gst_bin_add_many(GST_BIN(pipeline), this->source, this->processing_bin, NULL);
+  if(gst_element_link(this->source, this->processing_bin) != TRUE){
     printf("Could not link data-source to processing-bin");
   }
 }

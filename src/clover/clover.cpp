@@ -14,9 +14,12 @@ Clover::Clover(int * argc, char *** argv) {
 
   JackClient jack = JackClient();
   this->jack_client = &jack;  
+
+  jack.set_clover(this);
 }
 
 void Clover::set_visualizer_source(char * src) {
+  printf("Setting source to %s\n", src);
   g_object_set(this->visualizer->get_source(), "location", src, NULL);
 }
 

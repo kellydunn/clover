@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
   }
 
   Clover clover = Clover(&argc, &argv);
+  Clover * ref = &clover;
   clover.set_visualizer_source((char *) argv[1]);
 
   GstBus *bus;
@@ -22,11 +23,6 @@ int main(int argc, char **argv) {
 
   JackClient * jack = clover.get_jack_client();
   Visualizer * gst_ref = clover.get_visualizer();
-
-  // TODO The gstreamer client should run seperately
-  //      and should not need to know about jack and vice-versa.  
-  //      This should be handled by a nother class.
-  jack->set_gstreamer_client(clover.get_visualizer());
 
   // TODO Parse command line arguments and throw accordingly
   gst_element_set_state(gst_ref->pipeline, GST_STATE_PLAYING);

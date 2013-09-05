@@ -3,6 +3,10 @@
 
 #include <stdio.h>
 #include <jack/jack.h>
+
+class JackClient;
+class Visualizer;
+
 #include "visualizer.h"
 #include "jack-client.h"
 

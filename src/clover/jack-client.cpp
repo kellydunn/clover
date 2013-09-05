@@ -1,3 +1,4 @@
+#include "clover.h"
 #include "visualizer.h"
 #include "jack-client.h"
 #include <jack/jack.h>
@@ -8,7 +9,8 @@ jack_default_audio_sample_t * JackClient::get_audio_sample_from_port(jack_port_t
 }
 
 int JackClient::process(jack_nframes_t nframes, void *args){
-  JackClient * ref = (JackClient*) args;
+  Clover * clover = (Clover*) args;
+  JackClient * ref = clover->get_jack_client();
   JackClient data = *ref;
 
   jack_default_audio_sample_t *input_r = ref->get_audio_sample_from_port(data.input_port_r, nframes);
@@ -31,7 +33,7 @@ int JackClient::process(jack_nframes_t nframes, void *args){
 
   if(val > 0.0) {
     //g_object_set(global_gst->vert, "speed", val, NULL);
-    Visualizer * gst = data.get_gstreamer_client();
+    Visualizer * gst = clover->get_visualizer();
     g_object_set(gst->sol, "threshold", (int)val,NULL);
   }
 
@@ -51,15 +53,7 @@ double JackClient::window(jack_default_audio_sample_t in, int n) {
 }
 
 jack_port_t * JackClient::register_port_by_name(char * name) {
-  return jack_port_register(client, name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-}
-
-Visualizer * JackClient::get_gstreamer_client() {
-  return this->clover_gst;
-}
-
-void JackClient::set_gstreamer_client(Visualizer * clover_gst) {
-  this->clover_gst = clover_gst;
+  return jack_port_register(this->client, name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
 }
 
 // Creates a new JackClient.
@@ -74,16 +68,16 @@ JackClient::JackClient() {
     fprintf(stderr, "Could not open a connection to the JACK server.  Is JACK running?\n");
   }
 
-  this->input_port_l = register_port_by_name((char *) "group_mix_in:l");
-  this->input_port_r = register_port_by_name((char *) "group_mix_in:r");
-  this->output_port_l = register_port_by_name((char *) "master_out:l");
-  this->output_port_r = register_port_by_name((char *) "master_out:r");
+  this->input_port_l = this->register_port_by_name((char *) "group_mix_in:l");
+  this->input_port_r = this->register_port_by_name((char *) "group_mix_in:r");
+  this->output_port_l = this->register_port_by_name((char *) "master_out:l");
+  this->output_port_r = this->register_port_by_name((char *) "master_out:r");
 
   this->frames = (jack_nframes_t *) jack_get_buffer_size(this->client);
   this->fftw_in = (double *)fftw_malloc((intptr_t) frames * sizeof(double));
   this->fftw_out = (fftw_complex *)fftw_malloc((intptr_t) frames * sizeof(double));
 
-  jack_set_process_callback(this->client, JackClient::process, (void*)this);
+  jack_set_process_callback(this->client, JackClient::process, (void*)this->clover);
   jack_activate(this->client);
 
   ports = jack_get_ports(this->client, NULL, NULL, JackPortIsPhysical | JackPortIsInput);
@@ -93,4 +87,8 @@ JackClient::JackClient() {
     jack_connect(this->client, jack_port_name(this->output_port_l), ports[0]);
     jack_connect(this->client, jack_port_name(this->output_port_r), ports[0]);
   }  
+}
+
+void JackClient::set_clover(Clover * clover) {
+  this->clover = clover;
 }
