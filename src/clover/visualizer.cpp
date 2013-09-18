@@ -70,6 +70,7 @@ GstElement * Visualizer::get_source() {
 // @param {GstPad} new_pad.  A pointer to the pad that was generated during processing the demuxed video.
 // @param {GstreamerClient} gst.  A pointer to the instance of the GstreamerClient that is processing video.
 void Visualizer::pad_added(GstElement *src, GstPad *new_pad, Visualizer * gst) {
+  /*
   GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
   GstPadLinkReturn ret;
   GstCaps *new_pad_caps = NULL;
@@ -103,5 +104,6 @@ exit:
   }
 
   gst_object_unref(sink_pad);
+  */
 }
 
