@@ -41,12 +41,15 @@ make test
 
 - jack
 - fftw3
-- gstreamer-0.10
-- gstreamer-plugins-base-0.10
+- gstreamer-1.0
+- gstreamer-plugins-base-1.0
+- gstreamer-plugins-bad-1.0
+- gst-plugins-good
+- gst-ffmpeg
 
 If you're using video accelerated apis (vaapi), you might need to download the appropriate drivers for your video card as well as any additional codecs.  On my Arch System I needed to install the following:
 
-- gstreamer0.10-vaapi
+- gstreamer1.0-vaapi
 - libva-intel-driver
 
 ## roadmap
