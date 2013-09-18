@@ -2,8 +2,8 @@ CC=clang
 
 # TODO pkg-config isn't on all systems, make some way of checking for this stuff
 
-LDFLAGS=$(shell pkg-config --libs jack fftw3 gstreamer-1.0 gstreamer-plugins-base-1.0 gtk+-3.0) -lstdc++
-CFLAGS=$(shell pkg-config --cflags jack fftw3 gstreamer-1.0 gstreamer-plugins-base-1.0 gtk+-3.0) -lstdc++
+LDFLAGS=$(shell pkg-config --libs jack fftw3 gstreamer-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-bad-1.0 gtk+-3.0) -lstdc++ -DGST_DISABLE_DEPRECATED
+CFLAGS=$(shell pkg-config --cflags jack fftw3 gstreamer-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-bad-1.0 gtk+-3.0) -lstdc++ -DGST_DISABLE_DEPRECATED
 TEST_CFLAGS=$(CFLAGS) -lcheck
 TARGET_OBJS=bin/build/clover/*.o
 TEST_TARGET_OBJS=bin/build/clover/*.o 

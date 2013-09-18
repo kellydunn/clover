@@ -9,6 +9,7 @@ jack_default_audio_sample_t * JackClient::get_audio_sample_from_port(jack_port_t
 }
 
 int JackClient::process(jack_nframes_t nframes, void *args){
+  /*
   Clover * clover = (Clover*) args;
   JackClient * ref = clover->get_jack_client();
   JackClient data = *ref;
@@ -45,6 +46,7 @@ int JackClient::process(jack_nframes_t nframes, void *args){
   }
   printf("\n");
 
+  */
   return 0;
 }
 
@@ -58,6 +60,7 @@ jack_port_t * JackClient::register_port_by_name(char * name) {
 
 // Creates a new JackClient.
 JackClient::JackClient() {
+  /*
   options = JackNoStartServer;
   client_name = "clover";
   server_name = NULL;
@@ -87,8 +90,5 @@ JackClient::JackClient() {
     jack_connect(this->client, jack_port_name(this->output_port_l), ports[0]);
     jack_connect(this->client, jack_port_name(this->output_port_r), ports[0]);
   }  
-}
-
-void JackClient::set_clover(Clover * clover) {
-  this->clover = clover;
+  */
 }

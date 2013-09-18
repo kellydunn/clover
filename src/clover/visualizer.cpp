@@ -6,24 +6,42 @@
 Visualizer::Visualizer() {
   // Initialize general framework for the pipeline
   // TODO Abstract this out into seperate function
-  this->source =  gst_element_factory_make("filesrc", "source");
-  //this->set_source((char *) "filesrc", (char *) "source");
-  this->decoder = gst_element_factory_make("decodebin2", "uridecoder");
-  this->sink = gst_element_factory_make("autovideosink", "autodetect");
 
-  if(!this->source | !this->decoder | !this->sink){
-    printf("There was an error creating the processing elements.\n");
+  this->source  = gst_element_factory_make("filesrc", "source");
+  if(!this->source) {
+    printf("There was an error creating the source element\n");
+  }
+
+  this->decoder = gst_element_factory_make("decodebin", "uridecoder");
+  if(!this->decoder) {
+    printf("There was an error creating the decoder element\n");
+  }
+
+  this->sink    = gst_element_factory_make("autovideosink", "autodetect");
+  if(!this->sink){
+    printf("There was an error creating the sink element\n");
   }
 
   // Effect Elements
   // TODO Abstract this out into seperate function
-  this->ffmpegcolor = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace");
-  this->ffmpegcolor2 = gst_element_factory_make("ffmpegcolorspace", "ffmpegcolorspace2");
-  this->vert = gst_element_factory_make("vertigotv", "effectv");
-  this->sol = gst_element_factory_make("solarize", "gaudieffects");
+  this->ffmpegcolor = gst_element_factory_make("videoconvert", "ffmpegcolorspace");
+  if(!this->ffmpegcolor) {
+    printf("There was an error creating the ffmpegcolor.\n");
+  }
 
-  if(!this->ffmpegcolor | !this->ffmpegcolor2 | !this->vert | !this->sol){
-    printf("There was an error creating the effect elements.\n");
+  this->ffmpegcolor2 = gst_element_factory_make("videoconvert", "ffmpegcolorspace2");
+  if(!this->ffmpegcolor2) {
+    printf("There was an error creating the ffmpegcolor2.\n");
+  }
+
+  this->vert = gst_element_factory_make("vertigotv", "effectv");
+  if(!this->vert){
+    printf("There was an error creating the vert.\n");
+  }
+
+  this->sol = gst_element_factory_make("solarize", "gaudieffects");
+  if(!this->sol){
+    printf("There was an error creating the sol.\n");
   }
 
   // Pipeline and bins
@@ -36,16 +54,18 @@ Visualizer::Visualizer() {
 
   // Processing Bin
   // TODO Add effects based on configuration file one by one, and then  null terminate it.
-  gst_bin_add_many(GST_BIN(this->processing_bin), this->decoder, this->ffmpegcolor, this->sol, this->ffmpegcolor2, this->sink, NULL);
+  //gst_bin_add_many(GST_BIN(this->processing_bin), this->decoder, this->ffmpegcolor, this->sol, this->ffmpegcolor2, this->sink, NULL);
+  gst_bin_add_many(GST_BIN(this->processing_bin), this->decoder, this->sink, NULL);
 
 
   // TODO link elements based on configuration file one by one, and then null teriminated it.
   // NOTE visual effects appear to need their own ffmpegcolor start pad and sink pad.  
   //      Investigate linking all visual effects first, then linking to sink.
-  gst_element_link_many(this->ffmpegcolor, this->sol, this->ffmpegcolor2, this->sink, NULL);
+  //gst_element_link_many(this->ffmpegcolor, this->sol, this->ffmpegcolor2, this->sink, NULL);
+  //gst_element_link_many(this->ffmpegcolor, this->sol, this->ffmpegcolor2, this->sink, NULL);
+  gst_element_link_many(this->decoder, this->sink, NULL);
 
   gst_element_add_pad(this->processing_bin, gst_ghost_pad_new("bin_sink", gst_element_get_static_pad(this->decoder, "sink")));
-
   g_signal_connect(this->decoder, "pad-added", G_CALLBACK(Visualizer::pad_added), (gpointer)this);
 
   // Link source video to processing utils
@@ -70,6 +90,9 @@ GstElement * Visualizer::get_source() {
 // @param {GstPad} new_pad.  A pointer to the pad that was generated during processing the demuxed video.
 // @param {GstreamerClient} gst.  A pointer to the instance of the GstreamerClient that is processing video.
 void Visualizer::pad_added(GstElement *src, GstPad *new_pad, Visualizer * gst) {
+  printf("pad-added\n");
+  GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
+  gst_pad_link(new_pad, sink_pad);
   /*
   GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
   GstPadLinkReturn ret;

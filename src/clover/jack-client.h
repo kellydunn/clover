@@ -35,7 +35,6 @@ class JackClient {
     double window(jack_default_audio_sample_t in, int n);
     jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int nframes);
     static int process(jack_nframes_t nframes, void * args);
-    void set_clover(Clover * clover);
 
   private:
     Clover * clover;

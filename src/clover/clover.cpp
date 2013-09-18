@@ -9,13 +9,8 @@
 Clover::Clover(int * argc, char *** argv) {
   gst_init(argc, argv);
 
-  Visualizer vis = Visualizer();
-  this->visualizer = &vis;
-
-  JackClient jack = JackClient();
-  this->jack_client = &jack;  
-
-  jack.set_clover(this);
+  this->visualizer = new Visualizer();
+  this->jack_client = new JackClient();
 }
 
 void Clover::set_visualizer_source(char * src) {
