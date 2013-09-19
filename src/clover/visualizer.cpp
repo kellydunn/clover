@@ -7,17 +7,17 @@ Visualizer::Visualizer() {
   // Initialize general framework for the pipeline
   // TODO Abstract this out into seperate function
 
-  this->source  = gst_element_factory_make("filesrc", "source");
+  this->source  = gst_element_factory_make("videotestsrc", "source");
   if(!this->source) {
     printf("There was an error creating the source element\n");
   }
 
-  this->decoder = gst_element_factory_make("decodebin", "uridecoder");
+  this->decoder = gst_element_factory_make("videoconvert", "uridecoder");
   if(!this->decoder) {
     printf("There was an error creating the decoder element\n");
   }
 
-  this->sink    = gst_element_factory_make("autovideosink", "autodetect");
+  this->sink    = gst_element_factory_make("ximagesink", "autodetect");
   if(!this->sink){
     printf("There was an error creating the sink element\n");
   }
