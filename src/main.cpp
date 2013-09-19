@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <gst/gst.h>
 #include "clover/clover.h"
-#include "clover/jack-client.h"
+#include "clover/audio-sampler.h"
 #include "clover/visualizer.h"
 
 int main(int argc, char **argv) {
@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
   GstMessage *msg;
   gboolean terminate = FALSE;
 
-  JackClient * jack = clover.get_jack_client();
+  AudioSampler * jack = clover.get_audio_sampler();
   Visualizer * gst_ref = clover.get_visualizer();
 
   // TODO Parse command line arguments and throw accordingly

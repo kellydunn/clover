@@ -4,24 +4,23 @@
 #include <stdio.h>
 #include <jack/jack.h>
 
-class JackClient;
+class AudioSampler;
 class Visualizer;
 
 #include "visualizer.h"
-#include "jack-client.h"
+#include "audio-sampler.h"
 
 class Clover {
   public:
-
     Clover(int * argc, char ***argv);
     void set_visualizer_source(char *);
     void play();
     Visualizer * get_visualizer();
-    JackClient * get_jack_client();
+    AudioSampler * get_audio_sampler();
 
   private:
     Visualizer * visualizer;
-    JackClient * jack_client;    
+    AudioSampler * audio_sampler;
 };
 
 #endif

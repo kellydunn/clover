@@ -2,7 +2,7 @@
 //   - initializes JACK client and Gstreamer pipeline
 //   - play video file
 
-#include "jack-client.h"
+#include "audio-sampler.h"
 #include "visualizer.h"
 #include "clover.h"
 
@@ -10,7 +10,7 @@ Clover::Clover(int * argc, char *** argv) {
   gst_init(argc, argv);
 
   this->visualizer = new Visualizer();
-  this->jack_client = new JackClient();
+  this->audio_sampler = new AudioSampler();
 }
 
 void Clover::set_visualizer_source(char * src) {
@@ -22,8 +22,8 @@ Visualizer * Clover::get_visualizer() {
   return this->visualizer;
 }
 
-JackClient * Clover::get_jack_client() {
-  return this->jack_client;
+AudioSampler * Clover::get_audio_sampler() {
+  return this->audio_sampler;
 }
 
 void Clover::play() { 

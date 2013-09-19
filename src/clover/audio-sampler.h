@@ -1,7 +1,7 @@
-// This describes the fields and functionality of a JackClient
+// This describes the fields and functionality of an AudioSampler
 
-#ifndef CLOVER_JACK_H
-#define CLOVER_JACK_H
+#ifndef CLOVER_AUDIO_SAMPLER_H
+#define CLOVER_AUDIO_SAMPLER_H
 
 #include <stdio.h>
 #include <math.h>
@@ -14,7 +14,7 @@ class Visualizer;
 #include "visualizer.h" // TODO this should not be needed
 #include "clover.h"
 
-class JackClient {
+class AudioSampler {
   public:
     jack_client_t *client;
     jack_options_t options;
@@ -30,7 +30,9 @@ class JackClient {
     const char *server_name;
     const char **ports;
     
-    JackClient();
+    AudioSampler();
+    ~AudioSampler();
+
     jack_port_t * register_port_by_name(char *);
     double window(jack_default_audio_sample_t in, int n);
     jack_default_audio_sample_t * get_audio_sample_from_port(jack_port_t * port, int nframes);

@@ -24,6 +24,7 @@ Visualizer::Visualizer() {
 
   // Effect Elements
   // TODO Abstract this out into seperate function
+  /*
   this->ffmpegcolor = gst_element_factory_make("videoconvert", "ffmpegcolorspace");
   if(!this->ffmpegcolor) {
     printf("There was an error creating the ffmpegcolor.\n");
@@ -43,7 +44,7 @@ Visualizer::Visualizer() {
   if(!this->sol){
     printf("There was an error creating the sol.\n");
   }
-
+  */
   // Pipeline and bins
   this->pipeline = gst_pipeline_new("clover-pipeline");
   this->processing_bin = gst_bin_new("clover-processing-bin");
@@ -61,7 +62,6 @@ Visualizer::Visualizer() {
   // TODO link elements based on configuration file one by one, and then null teriminated it.
   // NOTE visual effects appear to need their own ffmpegcolor start pad and sink pad.  
   //      Investigate linking all visual effects first, then linking to sink.
-  //gst_element_link_many(this->ffmpegcolor, this->sol, this->ffmpegcolor2, this->sink, NULL);
   //gst_element_link_many(this->ffmpegcolor, this->sol, this->ffmpegcolor2, this->sink, NULL);
   gst_element_link_many(this->decoder, this->sink, NULL);
 
@@ -90,11 +90,7 @@ GstElement * Visualizer::get_source() {
 // @param {GstPad} new_pad.  A pointer to the pad that was generated during processing the demuxed video.
 // @param {GstreamerClient} gst.  A pointer to the instance of the GstreamerClient that is processing video.
 void Visualizer::pad_added(GstElement *src, GstPad *new_pad, Visualizer * gst) {
-  printf("pad-added\n");
-  GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
-  gst_pad_link(new_pad, sink_pad);
-  /*
-  GstPad *sink_pad = gst_element_get_static_pad(gst->ffmpegcolor, "sink");
+  GstPad *sink_pad = gst_element_get_static_pad(gst->decoder, "sink");
   GstPadLinkReturn ret;
   GstCaps *new_pad_caps = NULL;
   GstStructure *new_pad_struct = NULL;
@@ -106,7 +102,7 @@ void Visualizer::pad_added(GstElement *src, GstPad *new_pad, Visualizer * gst) {
     goto exit;
   }
 
-  new_pad_caps = gst_pad_get_caps(new_pad);
+  new_pad_caps = gst_pad_query_caps(new_pad, NULL);
   new_pad_struct = gst_caps_get_structure(new_pad_caps, 0);
   new_pad_type = gst_structure_get_name(new_pad_struct);
   if(!g_str_has_prefix(new_pad_type, "video/x-raw")) {
@@ -127,6 +123,5 @@ exit:
   }
 
   gst_object_unref(sink_pad);
-  */
 }
 

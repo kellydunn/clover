@@ -1,14 +1,16 @@
+// This class describes a utility that processes and samples of JACK audio
+
 #include "clover.h"
 #include "visualizer.h"
-#include "jack-client.h"
+#include "audio-sampler.h"
 #include <jack/jack.h>
 #include <fftw3.h>
 
-jack_default_audio_sample_t * JackClient::get_audio_sample_from_port(jack_port_t * port, int nframes) {
+jack_default_audio_sample_t * AudioSampler::get_audio_sample_from_port(jack_port_t * port, int nframes) {
   return (jack_default_audio_sample_t *)jack_port_get_buffer(port, nframes);
 }
 
-int JackClient::process(jack_nframes_t nframes, void *args){
+int AudioSampler::process(jack_nframes_t nframes, void *args){
   /*
   Clover * clover = (Clover*) args;
   JackClient * ref = clover->get_jack_client();
@@ -30,7 +32,7 @@ int JackClient::process(jack_nframes_t nframes, void *args){
   p = fftw_plan_dft_1d(nframes, (fftw_complex*) data.fftw_in, data.fftw_out, FFTW_FORWARD, FFTW_ESTIMATE);
   fftw_execute(p);
 
-  int val = ((intptr_t)(data.fftw_out[512]) * 5000) % 200;
+ int val = ((intptr_t)(data.fftw_out[512]) * 5000) % 200;
 
   if(val > 0.0) {
     //g_object_set(global_gst->vert, "speed", val, NULL);
@@ -50,16 +52,16 @@ int JackClient::process(jack_nframes_t nframes, void *args){
   return 0;
 }
 
-double JackClient::window(jack_default_audio_sample_t in, int n) {
+double AudioSampler::window(jack_default_audio_sample_t in, int n) {
   return .5 * (1 - cos((2*PI*n)/((intptr_t)this->frames))) * (double)in;
 }
 
-jack_port_t * JackClient::register_port_by_name(char * name) {
+jack_port_t * AudioSampler::register_port_by_name(char * name) {
   return jack_port_register(this->client, name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
 }
 
 // Creates a new JackClient.
-JackClient::JackClient() {
+AudioSampler::AudioSampler() {
   /*
   options = JackNoStartServer;
   client_name = "clover";

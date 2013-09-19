@@ -13,7 +13,8 @@ TEST_TARGET_OBJS=bin/build/clover/*.o
 
 all:
 	mkdir -p bin/build/clover
-	$(CC) -c $(LDFLAGS) $(CFLAGS) src/clover/jack-client.cpp -o bin/build/clover/jack-client.o
+	$(CC) -c $(LDFLAGS) $(CFLAGS) src/clover/audio-sampler.cpp -o bin/build/clover/audio-sampler.o
+	$(CC) -c $(LDFLAGS) $(CFLAGS) src/clover/spectrum-analyzer.cpp -o bin/build/clover/spectrum-analyzer.o
 	$(CC) -c $(LDFLAGS) $(CFLAGS) src/clover/visualizer.cpp -o bin/build/clover/visualizer.o
 	$(CC) -c $(LDFLAGS) $(CFLAGS) src/clover/clover.cpp -o bin/build/clover/clover.o
 	$(CC) $(LDFLAGS) $(CFLAGS) $(TARGET_OBJS) src/main.cpp  -o bin/clover

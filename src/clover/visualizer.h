@@ -5,6 +5,7 @@
 
 #include <gst/gst.h>
 #include <glib.h>
+#include <vector>
 
 class Visualizer {
   public:
@@ -13,13 +14,13 @@ class Visualizer {
     GstElement *sink;
     GstElement *processing_bin;
     GstElement *post_process_bin;
-    GstElement *ffmpegcolor;
-    GstElement *ffmpegcolor2;
-    GstElement *vert;
-    GstElement *sol;
+
+    // TODO this should be abstracted out into a list of GstElement
+    std::vector<GstElement*> effects;
 
     // Constructor
     Visualizer();
+    ~Visualizer();
 
     // source for Gstreamer pipeline
     void set_source(char *, char *);
