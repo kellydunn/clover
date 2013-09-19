@@ -30,8 +30,7 @@ class AudioSampler {
     const char *server_name;
     const char **ports;
     
-    AudioSampler();
-    ~AudioSampler();
+    AudioSampler(Clover *);
 
     jack_port_t * register_port_by_name(char *);
     double window(jack_default_audio_sample_t in, int n);

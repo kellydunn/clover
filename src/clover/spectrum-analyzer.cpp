@@ -1,4 +1,5 @@
 #include "spectrum-analyzer.h"
+#include <fftw3.h>
 
 // Returns a histogram that visually represents a FFT snapshot of audio data.
 // Bins are ordered by Frequency / FFT size.
@@ -12,4 +13,8 @@ double * SpectrumAnalyzer::histogram(double * fftw_in) {
   }
 
   return res;
+}
+
+void SpectrumAnalyzer::fft(jack_nframes_t nframes, double * fftw_in, double * fftw_out) {
+  // TODO Implement
 }

@@ -10,7 +10,7 @@ Clover::Clover(int * argc, char *** argv) {
   gst_init(argc, argv);
 
   this->visualizer = new Visualizer();
-  this->audio_sampler = new AudioSampler();
+  this->audio_sampler = new AudioSampler(this);
 }
 
 void Clover::set_visualizer_source(char * src) {
